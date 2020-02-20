@@ -12,8 +12,8 @@
 #include <mysql.h>          // for work with db MYSQL
 #include <boost/format.hpp> // boost library
 
-// v.0.0.1 Build from 01.12.19
-static const uint32_t appVersion = 0x00000001;
+// v.0.0.2 Build from 20.02.2020
+static const uint32_t appVersion = 0x00000002;
 // database password "adM1n34#184"
 
 using namespace std;
