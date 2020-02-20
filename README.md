@@ -1,2 +1,2 @@
-# uTraingServer
+# uTrainServer
 C++ project
