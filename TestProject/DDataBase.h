@@ -11,12 +11,13 @@
 #include <xstring>
 #include <string>
 
-enum class err_type {
+enum class err_type_db {
     ERR_OK = 0,
     ERR_DB_CONNECT,
     ERR_NOT_GOT_HOST_INFO,
     ERR_DB_DOESNT_RESPONSE,
     ERR_INCORRECT_REQUEST,
+    ERR_USER_NOT_FOUND,
 };
 
 class DDataBase
@@ -33,9 +34,17 @@ private:
     /* Init database connection */
     void DDataBaseInit();
     /* Get request for database to receive number of active users */
-    err_type RequestDatabaseUserNumber();
+    err_type_db RequestDatabaseUserNumber();
     /* Database handler */
     void handle();
+
+    /* Get request for database to receive first name of defined user */
+    err_type_db DDataBaseGetUserFirstName(std::string userName);
+    /* Get request for database to receive password of defined user */
+    err_type_db DDataBaseGetUserSecondName(std::string userName);
+    /* Get request for database to receive id of defined user */
+    err_type_db DDataBaseGetUserId(std::string userName);
+
 
 public:
     /* constructor */
@@ -44,15 +53,11 @@ public:
     ~DDataBase();
 
     /* database connect */
-    err_type DDataBaseConnect(std::string hostAddr,
+    err_type_db DDataBaseConnect(std::string hostAddr,
         std::string pass);
-    /* TODO: */
-    err_type DDataBaseGetUserData(std::string login);
-    /* TODO: */
-    err_type DDataBaseGetUserName(std::string userName);
 
-
-
+    /*  Get request for database to receive data of defined user */
+    err_type_db DDataBaseGetUserData(std::string userName);
     /* TODO: */
     void DDataBaseProcRequest(std::string request, uint32_t state);
 

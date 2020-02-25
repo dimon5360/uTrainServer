@@ -29,14 +29,14 @@ void DDataBase::DDataBaseInit() {
  * @param pass Database root user password
  * @retval Error code
  */
-err_type DDataBase::DDataBaseConnect(std::string hostAddr, std::string pass) {
+err_type_db DDataBase::DDataBaseConnect(std::string hostAddr, std::string pass) {
     
-    err_type errCode = err_type::ERR_OK;
+    err_type_db errCode = err_type_db::ERR_OK;
     conn = mysql_real_connect(&mysql, hostAddr.c_str(), "root",
         pass.c_str(), dbName.c_str(), dbPort, NULL, 0);
     if (!conn) {
         std::cout << mysql_error(&mysql) << std::endl;
-        return err_type::ERR_DB_CONNECT;
+        return err_type_db::ERR_DB_CONNECT;
     }
     std::cout << "Database connected." << std::endl;
 
@@ -44,44 +44,31 @@ err_type DDataBase::DDataBaseConnect(std::string hostAddr, std::string pass) {
     std::string hostInfo = mysql_get_host_info(&mysql);
     if (hostInfo.empty()) {
         std::cout << mysql_error(&mysql) << std::endl;
-        return err_type::ERR_NOT_GOT_HOST_INFO;
+        return err_type_db::ERR_NOT_GOT_HOST_INFO;
     }
     std::cout << hostInfo << std::endl;
 
     errCode = RequestDatabaseUserNumber();
-    if (errCode != err_type::ERR_OK) {
+    if (errCode != err_type_db::ERR_OK) {
         std::cout << "Database has no users.\n";
     }
-
-    /* request for existing user */
-    errCode = DDataBaseGetUserName("Dmitry");
-    if (errCode != err_type::ERR_OK) {
-        std::cout << "Database does not response.\n";
-        return err_type::ERR_DB_DOESNT_RESPONSE;
-    }
-
-    errCode = DDataBaseGetUserName("Petya");
-    if (errCode != err_type::ERR_OK) {
-        std::cout << "Database does not response.\n";
-        return err_type::ERR_DB_DOESNT_RESPONSE;
-    }
-
+      
     /* process database requests */
-    //handle();
-    return err_type::ERR_OK;
+    handle();
+    return err_type_db::ERR_OK;
 }
 
 /**
  * @brief Get request for database to receive number of active users
  * @retval Error code
  */
-err_type DDataBase::RequestDatabaseUserNumber() {
+err_type_db DDataBase::RequestDatabaseUserNumber() {
     int ret = 0;
     /* query to db */
     ret = mysql_query(conn, "select user_count()");
     if (ret != 0) {
         std::cout << "Incorrect request." << std::endl;
-        return err_type::ERR_INCORRECT_REQUEST;
+        return err_type_db::ERR_INCORRECT_REQUEST;
     }
     /* store result */
     res = mysql_store_result(conn);
@@ -93,15 +80,15 @@ err_type DDataBase::RequestDatabaseUserNumber() {
     std::cout << std::endl;
     /* free result */
     mysql_free_result(res);
-    return err_type::ERR_OK;
+    return err_type_db::ERR_OK;
 }
 
 /**
- * @brief Get request for database to receive number of active users
- * @param userName Name of user that must be checked
+ * @brief Get request for database to receive first name of defined user
+ * @param userName Name of user to get first name of user
  * @retval Error code
  */
-err_type DDataBase::DDataBaseGetUserName(std::string userName) {
+err_type_db DDataBase::DDataBaseGetUserFirstName(std::string userName) {
     int ret = 0;
     /* query to db */
     std::string query;
@@ -109,29 +96,129 @@ err_type DDataBase::DDataBaseGetUserName(std::string userName) {
     ret = mysql_query(conn, query.c_str());
     if (ret != 0) {
         std::cout << "Incorrect request." << std::endl;
-        return err_type::ERR_INCORRECT_REQUEST;
+        return err_type_db::ERR_INCORRECT_REQUEST;
     }
     /* store result */
     res = mysql_store_result(conn);
-    /* print result */
-    std::cout << "User name : " << std::endl;
-    while ((row = mysql_fetch_row(res)) != NULL) {
-        std::cout << row[0] << std::endl;
+    /* check that user found */
+    if ((row = mysql_fetch_row(res)) == NULL) {
+        std::cout << "User not found." << std::endl;
+        /* free result */
+        mysql_free_result(res);
+        return err_type_db::ERR_USER_NOT_FOUND;
     }
-    std::cout << std::endl;
+    else {
+        /* print result */
+        std::cout << "User first name : ";
+        std::cout << row[0] << std::endl;
+        while ((row = mysql_fetch_row(res)) != NULL) {
+            std::cout << row[0] << std::endl;
+        }
+    }
     /* free result */
     mysql_free_result(res);
-    return err_type::ERR_OK;
+    return err_type_db::ERR_OK;
 }
 
 /**
- * @brief TODO:
+ * @brief Get request for database to receive second name of defined user
+ * @param userName Name of user to get second name of user
  * @retval Error code
  */
-err_type DDataBase::DDataBaseGetUserData(std::string login) {
-    
-    mysql_query(conn, "select * from ");
-    return err_type::ERR_OK;
+err_type_db DDataBase::DDataBaseGetUserSecondName(std::string userName) {
+    int ret = 0;
+    /* query to db */
+    std::string query;
+    query = "select sname from users where fname = \"" + userName + "\"";
+    ret = mysql_query(conn, query.c_str());
+    if (ret != 0) {
+        std::cout << "Incorrect request." << std::endl;
+        return err_type_db::ERR_INCORRECT_REQUEST;
+    }
+    /* store result */
+    res = mysql_store_result(conn);
+    /* check that user found */
+    if ((row = mysql_fetch_row(res)) == NULL) {
+        std::cout << "User second name not found." << std::endl;
+        /* free result */
+        mysql_free_result(res);
+        return err_type_db::ERR_USER_NOT_FOUND;
+    }
+    else {
+        /* print result */
+        std::cout << "User second name : ";
+        std::cout << row[0] << std::endl;
+        while ((row = mysql_fetch_row(res)) != NULL) {
+            std::cout << row[0] << std::endl;
+        }
+    }
+    /* free result */
+    mysql_free_result(res);
+    return err_type_db::ERR_OK;
+}
+
+/**
+ * @brief Get request for database to receive id of defined user
+ * @param userName Name of user to get second name of user
+ * @retval Error code
+ */
+err_type_db DDataBase::DDataBaseGetUserId(std::string userName) {
+    int ret = 0;
+    /* query to db */
+    std::string query;
+    query = "select id from users where fname = \"" + userName + "\"";
+    ret = mysql_query(conn, query.c_str());
+    if (ret != 0) {
+        std::cout << "Incorrect request." << std::endl;
+        return err_type_db::ERR_INCORRECT_REQUEST;
+    }
+    /* store result */
+    res = mysql_store_result(conn);
+    /* check that user found */
+    if ((row = mysql_fetch_row(res)) == NULL) {
+        std::cout << "User id not found." << std::endl;
+        /* free result */
+        mysql_free_result(res);
+        return err_type_db::ERR_USER_NOT_FOUND;
+    }
+    else {
+        /* print result */
+        std::cout << "User id : ";
+        std::cout << row[0] << std::endl;
+        while ((row = mysql_fetch_row(res)) != NULL) {
+            std::cout << row[0] << std::endl;
+        }
+    }
+    /* free result */
+    mysql_free_result(res);
+    return err_type_db::ERR_OK;
+}
+
+/**
+ * @brief Get request for database to receive data of defined user
+ * @param userName Name to get user data
+ * @retval Error code
+ */
+err_type_db DDataBase::DDataBaseGetUserData(std::string userName) {
+
+    err_type_db errCode = err_type_db::ERR_OK;
+    std::cout << "\nRequest for user \"" << userName << "\"." << std::endl;
+    /* request for existing user */
+    errCode = DDataBaseGetUserFirstName(userName);
+    if (errCode != err_type_db::ERR_OK) {
+        return errCode;
+    }
+    /* request for existing user */
+    errCode = DDataBaseGetUserSecondName(userName);
+    if (errCode != err_type_db::ERR_OK) {
+        return errCode;
+    }
+    /* request for existing user */
+    errCode = DDataBaseGetUserId(userName);
+    if (errCode != err_type_db::ERR_OK) {
+        return errCode;
+    }
+    return err_type_db::ERR_OK;
 }
 
 /**
@@ -162,11 +249,20 @@ void DDataBase::DDataBaseProcRequest(std::string request, uint32_t state) {
  */
 void DDataBase::handle() {
 
-    while (1) {
-        if (DDataBase::DDataBaseGetUserName("Dmitry") > 0) {
-            DDataBaseProcRequest("", 0);
-            /* TODO: */
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(3));
+    err_type_db errCode = err_type_db::ERR_OK;
+    /* request for existing user */
+    errCode = DDataBaseGetUserData("Dmitry");
+    if (errCode != err_type_db::ERR_OK) {
+        std::cout << "Database does not response.\n";
+    }
+
+    errCode = DDataBaseGetUserData("Petya");
+    if (errCode != err_type_db::ERR_OK) {
+        std::cout << "Database does not response.\n";
+    }
+
+    errCode = DDataBaseGetUserData("Denis");
+    if (errCode != err_type_db::ERR_OK) {
+        std::cout << "Database does not response.\n";
     }
 }

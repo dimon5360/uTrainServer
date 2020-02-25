@@ -12,8 +12,8 @@
 #include <mysql.h>          // for work with db MYSQL
 #include <boost/format.hpp> // boost library
 
-// v.0.0.2 Build from 20.02.2020
-static const uint32_t appVersion = 0x00000002;
+// v.0.0.3 Build from 25.02.2020
+static const uint32_t appVersion = 0x00000003;
 // database password "adM1n34#184"
 
 using namespace std;
@@ -63,12 +63,12 @@ static void serverInit(void) {
  * @brief Handle for database thread 
  */
 static void databaseInit(void) {
-    err_type errCode = err_type::ERR_OK;
+    err_type_db errCode = err_type_db::ERR_OK;
     /* create database connection */
     db = make_shared<DDataBase>("testdb", 3306);
     /* connect to user databse */
     errCode = db->DDataBaseConnect("localhost", "adM1n34#184");
-    if (errCode != err_type::ERR_OK) {
+    if (errCode != err_type_db::ERR_OK) {
         std::cout << "Database has failed.\n";
     }
     else {
