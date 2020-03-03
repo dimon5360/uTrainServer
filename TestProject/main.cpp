@@ -35,16 +35,15 @@ std::shared_ptr<DDataProcess> dataProcessor;
 int main() {
 
     PrintInfoApp();
-    ///* thread for server connect */
-    //std::thread t1{ serverInit };
-    ///* thread for database connect */
-    //std::thread t2{ databaseInit };
-    ///* thread for data process */
-    //std::thread t3{ dataProcessInit };
-
-    /*t1.join();
+    /* thread for server connect */
+    std::thread t1{ serverInit };
+    /* thread for database connect */
+    std::thread t2{ databaseInit };
+    /* thread for data process */
+    std::thread t3{ dataProcessInit };
+    t1.join();
     t2.join();
-    t3.join();*/
+    t3.join();
 
     databaseInit();
 
