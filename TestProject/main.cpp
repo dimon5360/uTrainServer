@@ -5,6 +5,9 @@
 #include "DDataBase.h"
 #include "DDataProcess.h"
 
+#include "jsonParser.h"
+#include "unitTests.h"
+
 /* internal libs */
 #include <iostream>
 #include <memory>
@@ -26,13 +29,24 @@ static void serverInit(void);
 static void databaseInit(void);
 /* Handle for data process thread */
 static void dataProcessInit(void);
+/* Handle for JSON process thread */
+static void jsonProcessInit(void);
 
 std::shared_ptr<SServer> server;
 std::shared_ptr<DDataBase> db;
 std::shared_ptr<DDataProcess> dataProcessor;
+std::shared_ptr< jsonParser> jsonProcessor;
+#if UNIT_TESTS_ENABLE
+std::shared_ptr<UnitTests> unitTests;
+#endif /* UNIT_TESTS_ENABLE */
 
 /* entry point */
 int main() {
+
+#if UNIT_TESTS_ENABLE
+    unitTests = make_shared<UnitTests>();
+#endif /* UNIT_TESTS_ENABLE */
+
 
     PrintInfoApp();
     /* thread for server connect */
@@ -41,9 +55,13 @@ int main() {
     std::thread t2{ databaseInit };
     /* thread for data process */
     std::thread t3{ dataProcessInit };
+    /* thread for data process */
+    std::thread t4{ jsonProcessInit };
+
     t1.join();
     t2.join();
     t3.join();
+    t4.join();
 
     databaseInit();
 
@@ -81,6 +99,14 @@ static void databaseInit(void) {
 static void dataProcessInit(void) {
     /* create thread for data processor */
     dataProcessor = make_shared<DDataProcess>();
+}
+
+/**
+ * @brief Handle for JSON process thread
+ */
+static void jsonProcessInit(void) {
+    /* create thread for data processor */
+    jsonProcessor = make_shared<jsonParser>();
 }
 
 /** 

@@ -54,4 +54,5 @@ public:
     ~SServer();
 };
 
-void CreateNewThread(SOCKET s, SOCKADDR_IN addr);
+/* main server thread handler */
+extern void CreateNewThread(SOCKET s, SOCKADDR_IN addr);
