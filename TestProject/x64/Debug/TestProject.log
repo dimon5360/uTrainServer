@@ -1,9 +1,7 @@
-﻿  jsonParser.cpp
+﻿  DDataBase.cpp
+  JJsonParser.cpp
   SServer.cpp
+  UUnitTests.cpp
   main.cpp
-C:\Users\User\source\repos\TestProject\TestProject\main.cpp(42,5): error C2065: UnitTests: необъявленный идентификатор
-C:\Users\User\source\repos\TestProject\TestProject\main.cpp(42,15): error C2146: синтаксическая ошибка: отсутствие ";" перед идентификатором "unitTests"
-C:\Users\User\source\repos\TestProject\TestProject\main.cpp(42,15): error C2065: unitTests: необъявленный идентификатор
-  unitTests.cpp
   Создание кода...
-C:\Users\User\source\repos\TestProject\TestProject\jsonParser.cpp(37): error C4716: jsonParse: должна возвращать значение
+  TestProject.vcxproj -> C:\Users\User\source\repos\TestProject\x64\Debug\TestProject.exe

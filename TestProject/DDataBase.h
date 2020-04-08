@@ -1,4 +1,16 @@
+/**
+ *  @file DDataBase.h
+ *  @note MySQL data base processor class prototype
+ *
+ *  @date 08.04.2020
+ *  @author Kalmykov Dmitry
+ *
+ *  @modified 08.04.2020
+ *  @version 0.1
+ */
+
 #pragma once
+#include "config.h"
 
 #include <iostream>
 #include <thread>
@@ -11,6 +23,7 @@
 #include <xstring>
 #include <string>
 
+/* error codes for data base */
 enum class err_type_db {
     ERR_OK = 0,
     ERR_DB_CONNECT,

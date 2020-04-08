@@ -1,6 +1,18 @@
+/**
+ *  @file SServer.h
+ *  @note TCP server class prototype
+ *
+ *  @date 08.04.2020
+ *  @author Kalmykov Dmitry
+ *
+ *  @modified 08.04.2020
+ *  @version 0.1
+ */
+
 #pragma once
 
 #include "DDataBase.h"
+#include "config.h"
 
 #include <memory>
 #include <cstring>
@@ -20,7 +32,8 @@
 /*  max number of threads */
 #define THREADS_MAX_NUMBER  10
 
-enum class err_type {
+/* error codes for server work */
+enum class err_type_server {
     ERR_OK = 0,
     ERR_INIT_WSA,
     ERR_INIT_SOCKET,
@@ -45,7 +58,7 @@ private:
     char buffer[1024];
 
     /* private prototypes */
-    err_type SServerInit(void);
+    err_type_server SServerInit(void);
     void handle(void);
 
 public:

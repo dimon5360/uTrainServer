@@ -164,19 +164,20 @@
     <ClCompile Include="CClient.cpp" />
     <ClCompile Include="DDataProcess.cpp" />
     <ClCompile Include="DDataBase.cpp" />
-    <ClCompile Include="jsonParser.cpp" />
+    <ClCompile Include="JJsonParser.cpp" />
     <ClCompile Include="SServer.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="unitTests.cpp" />
+    <ClCompile Include="UUnitTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CClient.h" />
     <ClInclude Include="DDataProcess.h" />
     <ClInclude Include="DDataBase.h" />
-    <ClInclude Include="jsonParser.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="JJsonParser.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="SServer.h" />
-    <ClInclude Include="unitTests.h" />
+    <ClInclude Include="UUnitTests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

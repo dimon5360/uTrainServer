@@ -1,4 +1,15 @@
-#include "SServer.h"
+/**
+ *  @file SServer.cpp
+ *  @note TCP server class realization
+ *
+ *  @date 08.04.2020
+ *  @author Kalmykov Dmitry
+ *
+ *  @modified 08.04.2020
+ *  @version 0.1
+ */
+
+#include "main.h"
 
 #include <iostream>
 #include <thread>
@@ -12,21 +23,21 @@ uint32_t countThread = 0;
 /**
  * @brief initialize TCP server 
  */
-err_type SServer::SServerInit(void) {
+err_type_server SServer::SServerInit(void) {
 #if LOG_FUNCTIONS_CALLS
     cout << __FUNCTION__ << endl;
 #endif
 
     /* init winsock dll */
     if (WSAStartup(MAKEWORD(2, 2), &wData) != 0) {
-        return err_type::ERR_INIT_WSA;
+        return err_type_server::ERR_INIT_WSA;
     }
     printf("WSA Startup succes\n");
 
     /* socket init */
     if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
         std::cout << "Error socket opening. Socket is " << sock << std::endl;
-        return err_type::ERR_INIT_SOCKET;
+        return err_type_server::ERR_INIT_SOCKET;
     } 
 
     addr.sin_family = AF_INET;
@@ -36,16 +47,16 @@ err_type SServer::SServerInit(void) {
     if (bind(sock, (struct sockaddr*)&addr,
         sizeof(addr)) < 0) {
         std::cout << "Socket did not bind.\n";
-        return err_type::ERR_SOCKET_BIND;
+        return err_type_server::ERR_SOCKET_BIND;
     }
 
     if (listen(sock, THREADS_MAX_NUMBER) < 0) {
         std::cout << "Socket did not listen.\n";
-        return err_type::ERR_SOCKET_LISTEN;
+        return err_type_server::ERR_SOCKET_LISTEN;
     }
 
     handle();
-    return err_type::ERR_OK;
+    return err_type_server::ERR_OK;
 }
 
 
@@ -156,6 +167,7 @@ void CreateNewThread(SOCKET s, SOCKADDR_IN addr) {
     }
 }
 
+#include <boost/format.hpp> // boost library
 /**
  * @brief server class constructor 
  */
@@ -163,12 +175,15 @@ SServer::SServer(std::string s_ip, uint16_t s_port) {
 #if LOG_FUNCTIONS_CALLS
     cout << __FUNCTION__ << endl;
 #endif
+    cout << "TCP server IP : " << boost::format("%s:%u") %
+        s_ip % s_port << endl;
+
     /* init tcp ip address */
     this-> port = s_port;
     /* init tcp ip port */
     this->ip = s_ip;
-    err_type err = SServerInit();
-    if (err != err_type::ERR_OK) {
+    err_type_server err = SServerInit();
+    if (err != err_type_server::ERR_OK) {
         std::cout << "Initialization of TCP server failed." << std::endl;
     }
 }

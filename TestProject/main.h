@@ -1,6 +1,17 @@
+/**
+ * @file main.h
+ * @note Keep includes
+ *
+ * @date 08.04.2020
+ * @author Kalmykov Dmitry
+ */
+
 #pragma once
 
-#define LOG_FUNCTIONS_CALLS 0
-#define UNIT_TESTS_ENABLE   1
+/* user classes */
+#include "SServer.h"
+#include "DDataBase.h"
+#include "DDataProcess.h"
 
-#define NEW_REALIZATION 0
+#include "JJsonParser.h"
+#include "UUnitTests.h"

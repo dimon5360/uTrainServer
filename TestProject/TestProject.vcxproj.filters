@@ -30,10 +30,10 @@
     <ClCompile Include="DDataProcess.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="jsonParser.cpp">
+    <ClCompile Include="JJsonParser.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="unitTests.cpp">
+    <ClCompile Include="UUnitTests.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,10 +53,13 @@
     <ClInclude Include="DDataProcess.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="jsonParser.h">
+    <ClInclude Include="config.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="unitTests.h">
+    <ClInclude Include="JJsonParser.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="UUnitTests.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

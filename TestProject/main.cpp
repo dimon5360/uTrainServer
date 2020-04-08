@@ -1,12 +1,5 @@
 ﻿#include "main.h"
-
-/* user classes */
-#include "SServer.h"
-#include "DDataBase.h"
-#include "DDataProcess.h"
-
-#include "jsonParser.h"
-#include "unitTests.h"
+#include "config.h"
 
 /* internal libs */
 #include <iostream>
@@ -15,8 +8,8 @@
 #include <mysql.h>          // for work with db MYSQL
 #include <boost/format.hpp> // boost library
 
-// v.0.0.3 Build from 25.02.2020
-static const uint32_t appVersion = 0x00000003;
+// v.0.0.4 Build from 08.04.2020
+static const uint32_t appVersion = 0x00000004;
 // database password "adM1n34#184"
 
 using namespace std;
@@ -35,20 +28,22 @@ static void jsonProcessInit(void);
 std::shared_ptr<SServer> server;
 std::shared_ptr<DDataBase> db;
 std::shared_ptr<DDataProcess> dataProcessor;
-std::shared_ptr< jsonParser> jsonProcessor;
+std::shared_ptr<JJsonParser> jsonProcessor;
 #if UNIT_TESTS_ENABLE
-std::shared_ptr<UnitTests> unitTests;
+std::shared_ptr<UUnitTests> unitTests;
 #endif /* UNIT_TESTS_ENABLE */
 
 /* entry point */
 int main() {
 
-#if UNIT_TESTS_ENABLE
-    unitTests = make_shared<UnitTests>();
-#endif /* UNIT_TESTS_ENABLE */
-
-
     PrintInfoApp();
+
+#if UNIT_TESTS_ENABLE
+    unitTests = make_shared<UUnitTests>();
+    if (!unitTests->GetUnitTestsResult()) {
+        return -1;
+    }
+#else 
     /* thread for server connect */
     std::thread t1{ serverInit };
     /* thread for database connect */
@@ -62,8 +57,7 @@ int main() {
     t2.join();
     t3.join();
     t4.join();
-
-    databaseInit();
+#endif /* UNIT_TESTS_ENABLE */
 
     return 0;
 }
@@ -106,17 +100,20 @@ static void dataProcessInit(void) {
  */
 static void jsonProcessInit(void) {
     /* create thread for data processor */
-    jsonProcessor = make_shared<jsonParser>();
+    jsonProcessor = make_shared<JJsonParser>();
 }
 
 /** 
  * @brief print application information 
  */
 static void PrintInfoApp(void) {
-    cout << "Server started. Hello %username% " << endl;
+    cout << "Application started. Hello %username% " << endl;
     cout << "Application version v." <<  boost::format("%u.%u.%u") % 
         ((appVersion>>16) & 0xFF) %
         ((appVersion>>8) & 0xFF) %
         ((appVersion) & 0xFF) << endl;
+
+    cout << "Compilation time: " << boost::format("%s %s") %
+        __DATE__ % __TIME__ << endl;
 
 }
