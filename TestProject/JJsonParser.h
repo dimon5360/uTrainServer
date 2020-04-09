@@ -23,6 +23,7 @@
 
 using namespace std;
 
+
 class JJsonParser
 {
 private:
@@ -41,25 +42,24 @@ private:
 
 public:
     /* constructor */
-    JJsonParser();
+    JJsonParser(void);
     /* destructor */
-    ~JJsonParser();
-
-
+    ~JJsonParser(void);
+    
 
 /* UNIT_TESTS -------------------------------------------------------------- */
 private:
-#if UNIT_TEST_QUEUE_EXCHANGE
+#if UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE
     bool unitTestResult = false;
-#endif /* UNIT_TEST_QUEUE_EXCHANGE */
+#endif /* UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE */
 
 public:
-#if UNIT_TEST_QUEUE_EXCHANGE
+#if UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE
     /* redefined constructor for unit test */
-    JJsonParser(string testReq);
+    JJsonParser(string testReq, bool parsedNeed = false);
     /* unit test result for test queue */
     bool GetUnitTestResult(void);
-#endif /* UNIT_TEST_QUEUE_EXCHANGE */
+#endif /* UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE */
        
 };
 

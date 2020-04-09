@@ -8,8 +8,8 @@
 #include <mysql.h>          // for work with db MYSQL
 #include <boost/format.hpp> // boost library
 
-// v.0.0.4 Build from 08.04.2020
-static const uint32_t appVersion = 0x00000004;
+// v.0.0.5 Build from 09.04.2020
+static const uint32_t appVersion = 0x00000005;
 // database password "adM1n34#184"
 
 using namespace std;
