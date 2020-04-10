@@ -16,13 +16,10 @@
 /* unit tests items--------------------------------------------------------- */
 #define UNIT_TESTS_ENABLE               1
 #if UNIT_TESTS_ENABLE
-#define UNIT_TEST_QUEUE_EXCHANGE        0
-#define UNIT_TEST_JSON_PARSE            1
-#if UNIT_TEST_JSON_PARSE
-#define TEST1                           1
-#define TEST2                           0
-#define TEST3                           0 // while '-'
-#endif /* UNIT_TEST_JSON_PARSE */
+#define UNIT_TEST_JSON_PARSER           1
+#if UNIT_TEST_JSON_PARSER
+#define TEST4                           1
+#endif /* UNIT_TEST_JSON_PARSER */
 
 
 #endif /* UNIT_TESTS_ENABLE */

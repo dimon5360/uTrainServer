@@ -5,8 +5,8 @@
  *  @date 08.04.2020
  *  @author Kalmykov Dmitry
  *
- *  @modified 09.04.2020
- *  @version 0.2
+ *  @modified 10.04.2020
+ *  @version 0.3
  */
 
 #include "config.h"
@@ -54,7 +54,7 @@ string JJsonParser::getJsonReqQueue(void) {
     return jsonString;
 }
 
-uint32_t jsonParse(string jsonDoc) {
+uint32_t parseJsonRequest(string jsonDoc) {
 
     return 0;
 }
@@ -70,13 +70,14 @@ void JJsonParser::jsonHandler(void) {
         /* check if queue is empty */
         if (!jsonQueue.empty()) {
             jsonReq = getJsonReqQueue();
+
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(3));
     }
 }
 
 /* UNIT_TESTS -------------------------------------------------------------- */
-#if UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE
+#if UNIT_TEST_JSON_PARSER
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -97,83 +98,56 @@ JJsonParser::JJsonParser(string testReq, bool parsedNeed) {
     /* check if queue is empty */
     if (!jsonQueue.empty()) {
         string jsonReq = getJsonReqQueue();
+
         if (!parsedNeed && jsonReq == testReq) {
             inputData.clear();
             unitTestResult = true;
         }
         else if (parsedNeed) {
 
-            std::stringstream req; 
-
 #if TEST1
-            req << "{ \"menu\": { \"foo\": [ \"ad \", 4, 3, 4, 5 ], \"bar\": \"true\", \"value\": 102.3E+06,\
-                     \"popup\": { \"value\": \"New\", \"onclick\": \"CreateNewDoc()\" } } }";
             string dataForReq = "menu", dataForReq2 = "menu.popup", dataForReq3 = "menu.foo";
 #elif TEST2
-            req << "{ \"root\": { \"values\": [1, 2, 3, 4, 5 ] } }";
             string dataForReq = "root.values";
 #elif TEST3
-            req << "{ \"foo\" : \"bar\" }";
             string dataForReq = "foo";
+#elif TEST4
+            string dataForReq = "validation-factors.validationFactors", dataForReq2 = "password", dataForReq3 = "username";
 #endif /* TEST_ITEM */
+
+            std::stringstream req;
+            req << testReq;
 
             try
             {
                 pt::ptree tree;
                 pt::read_json(req, tree);
 
-                BOOST_FOREACH(boost::property_tree::ptree::value_type &v, tree.get_child(dataForReq))
-                {
-                    if (v.first.empty() || v.second.size()) { // TODO: need to check 'what does this mean'
 #if JSON_PROC_PARSER_LOG
-                        std::cout << v.first.data() << " ";
+                cout << "Parser started. Request is valid." << endl;
 #endif /* JSON_PROC_PARSER_LOG */
-                        continue;
-                    }
+                BOOST_FOREACH(auto &v, tree)
+                {
+                    /* If v.second.size() == 0 it means that current branch does not have any branches.
+                       If size is more than 0 then cuurent branch of tree has subbranch */
+                    //if (v.first == "username" || v.first == "validation-factors")
+                    //{
+                        cout << v.first.size() << " "; /*> size is the size of defined block in structure (length of word), 
+                        possibly size means the same of size() */
+                        std::cout << v.first.data() << " - ";
+                        cout << v.second.size() << " "; // number of subtrees
+                        std::cout << v.second.get<std::string>("") << std::endl;
+                    //}
 #if JSON_PROC_PARSER_LOG
-                    std::cout << v.first.data() << " : ";
-                    std::cout << v.second.data() << std::endl;
+                    /*std::cout << "[ " << v.first.size() << " ] \"";
+                    std::cout << v.first.data() << "\" : ";
+                    std::cout << "[ " << v.second.size() << " ] \"";
+                    std::cout << v.second.data() << "\"" << std::endl;*/
 #endif /* JSON_PROC_PARSER_LOG */
                 }
 #if JSON_PROC_PARSER_LOG
                 std::cout << std::endl;
 #endif /* JSON_PROC_PARSER_LOG */
-
-#if TEST1
-                BOOST_FOREACH(boost::property_tree::ptree::value_type& v, tree.get_child(dataForReq2))
-                {
-                    if (v.first.empty() || v.second.size()) {
-#if JSON_PROC_PARSER_LOG
-                        std::cout << v.second.data() << " ";
-#endif /* JSON_PROC_PARSER_LOG */
-                        continue;
-                    }
-#if JSON_PROC_PARSER_LOG
-                    std::cout << v.first.data() << " : ";
-                    std::cout << v.second.data() << std::endl;
-#endif /* JSON_PROC_PARSER_LOG */
-                }
-#if JSON_PROC_PARSER_LOG
-                std::cout << std::endl;
-#endif /* JSON_PROC_PARSER_LOG */
-
-                BOOST_FOREACH(boost::property_tree::ptree::value_type& v, tree.get_child(dataForReq3))
-                {
-                    if (v.first.empty() || v.second.size()) {
-#if JSON_PROC_PARSER_LOG
-                        std::cout << v.second.data() << " ";
-#endif /* JSON_PROC_PARSER_LOG */
-                        continue;
-                    }
-#if JSON_PROC_PARSER_LOG
-                    std::cout << v.first.data() << " : ";
-                    std::cout << v.second.data() << std::endl;
-#endif /* JSON_PROC_PARSER_LOG */
-                }
-#if JSON_PROC_PARSER_LOG
-                std::cout << std::endl;
-#endif /* JSON_PROC_PARSER_LOG */
-#endif /* TEST1 */
 
                 unitTestResult = true;
                 return;
@@ -191,4 +165,4 @@ JJsonParser::JJsonParser(string testReq, bool parsedNeed) {
 bool JJsonParser::GetUnitTestResult(void) {
     return unitTestResult;
 }
-#endif /* UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE */
+#endif /* UNIT_TEST_JSON_PARSER */

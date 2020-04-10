@@ -23,7 +23,6 @@
 
 using namespace std;
 
-
 class JJsonParser
 {
 private:
@@ -39,6 +38,9 @@ private:
     string getJsonReqQueue(void);
     /* Put JSON data to queue */
     void putJsonReqQueue(string);
+    /* Put JSON data to queue */
+    // TODO: replace error code type to unum struct
+    uint32_t parseJsonRequest(string); 
 
 public:
     /* constructor */
@@ -49,19 +51,16 @@ public:
 
 /* UNIT_TESTS -------------------------------------------------------------- */
 private:
-#if UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE
+#if UNIT_TEST_JSON_PARSER
     bool unitTestResult = false;
-#endif /* UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE */
+#endif /* UNIT_TEST_JSON_PARSER */
 
 public:
-#if UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE
+#if UNIT_TEST_JSON_PARSER
     /* redefined constructor for unit test */
     JJsonParser(string testReq, bool parsedNeed = false);
     /* unit test result for test queue */
     bool GetUnitTestResult(void);
-#endif /* UNIT_TEST_QUEUE_EXCHANGE || UNIT_TEST_JSON_PARSE */
+#endif /* UNIT_TEST_JSON_PARSER */
        
 };
-
-/* test JSON parser */
-extern uint32_t jsonParse(string jsonDoc);
