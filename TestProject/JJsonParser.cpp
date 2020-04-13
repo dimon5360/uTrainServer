@@ -54,11 +54,6 @@ string JJsonParser::getJsonReqQueue(void) {
     return jsonString;
 }
 
-uint32_t parseJsonRequest(string jsonDoc) {
-
-    return 0;
-}
-
 /**
  * @brief JSON parser main handler
  */
@@ -79,15 +74,6 @@ void JJsonParser::jsonHandler(void) {
 /* UNIT_TESTS -------------------------------------------------------------- */
 #if UNIT_TEST_JSON_PARSER
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
-#include <string>
-#include <set>
-#include <exception>
-#include <iostream>
-
-namespace pt = boost::property_tree;
 
 /**
  * @brief JSON parser class constructor
@@ -123,27 +109,10 @@ JJsonParser::JJsonParser(string testReq, bool parsedNeed) {
                 pt::ptree tree;
                 pt::read_json(req, tree);
 
-#if JSON_PROC_PARSER_LOG
-                cout << "Parser started. Request is valid." << endl;
-#endif /* JSON_PROC_PARSER_LOG */
-                BOOST_FOREACH(auto &v, tree)
-                {
-                    /* If v.second.size() == 0 it means that current branch does not have any branches.
-                       If size is more than 0 then cuurent branch of tree has subbranch */
-                    //if (v.first == "username" || v.first == "validation-factors")
-                    //{
-                        cout << v.first.size() << " "; /*> size is the size of defined block in structure (length of word), 
-                        possibly size means the same of size() */
-                        std::cout << v.first.data() << " - ";
-                        cout << v.second.size() << " "; // number of subtrees
-                        std::cout << v.second.get<std::string>("") << std::endl;
-                    //}
-#if JSON_PROC_PARSER_LOG
-                    /*std::cout << "[ " << v.first.size() << " ] \"";
-                    std::cout << v.first.data() << "\" : ";
-                    std::cout << "[ " << v.second.size() << " ] \"";
-                    std::cout << v.second.data() << "\"" << std::endl;*/
-#endif /* JSON_PROC_PARSER_LOG */
+                err_type_jp errCode = parseJsonRequest(dataForReq, tree);
+                if (errCode != err_type_jp::ERR_OK) {
+                    std::cout << "Database has failed.";
+                    return;
                 }
 #if JSON_PROC_PARSER_LOG
                 std::cout << std::endl;
@@ -166,3 +135,48 @@ bool JJsonParser::GetUnitTestResult(void) {
     return unitTestResult;
 }
 #endif /* UNIT_TEST_JSON_PARSER */
+
+err_type_jp JJsonParser::parseJsonRequest(string jsonDoc, pt::ptree tree) {
+    err_type_jp errCode = err_type_jp::ERR_OK;
+
+#if JSON_PROC_PARSER_LOG
+    //cout << "\nKey of pair : Value of pair" << endl;
+#endif /* JSON_PROC_PARSER_LOG */
+
+    /* loop checks all values */
+    BOOST_FOREACH(auto & v, tree)
+    {
+        /* If v.second.size() == 0 it means that current branch does not have any branches.
+           If size is more than 0 then cuurent branch of tree has subbranch */
+        if (v.second.size() == 0) {
+            cout << "[" << v.first.size() << "] "; /*> size is the size of defined block in structure (length of word),
+            possibly size means the same of size() */
+            std::cout << v.first.data() << " : ";
+            cout << "[" << v.second.size() << "] "; // number of subtrees
+            std::cout << v.second.get<std::string>("");
+            std::cout << std::endl;            
+        }
+        else {
+            if (tree.get_child(jsonDoc).count(v.first.data()) == 0) {
+                cout << "[" << tree.get_child(jsonDoc).count(v.first.data()) << "] ";
+                cout << v.first.data() << " : " << endl;
+                cout << "[" << v.second.size() << "] "; // number of subtrees
+                std::cout << v.second.get<std::string>("");
+            }
+            else {
+                string firstData = v.first.data();
+                cout << "[" << v.first.size() << "] "; /*> size is the size of defined block in structure (length of word),
+                possibly size means the same of size() */
+                std::cout << firstData << " : ";
+                errCode = parseJsonRequest(firstData, tree.get_child((firstData)));
+                if (errCode != err_type_jp::ERR_OK) {
+                    std::cout << "Database has failed.";
+                    return err_type_jp::ERR_PARSE_FAILED;
+                }
+            }
+        }
+    }
+    std::cout << std::endl;
+    return err_type_jp::ERR_OK;
+
+}

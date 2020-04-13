@@ -115,6 +115,7 @@ static err_type_ut TestJsonParserTestData(void) {
 
 #endif /* TEST_ITEM */
 
+    cout << sJsonTestReq << endl << endl;
     /* test data processor in main thread */
     shared_ptr<JJsonParser> jsonProcessor = make_shared<JJsonParser>(sJsonTestReq, true);
 

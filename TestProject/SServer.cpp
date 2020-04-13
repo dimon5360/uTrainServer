@@ -10,12 +10,8 @@
  */
 
 #include "main.h"
-
-#include <iostream>
-#include <thread>
-#include <chrono>
+/* socket prototypes */
 #include <Windows.h>
-#include <sstream>
 
 std::thread t[THREADS_MAX_NUMBER];
 uint32_t countThread = 0;
@@ -44,11 +40,11 @@ err_type_server SServer::SServerInit(void) {
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port = htons(port);
 
-    if (bind(sock, (struct sockaddr*)&addr,
-        sizeof(addr)) < 0) {
-        std::cout << "Socket did not bind.\n";
-        return err_type_server::ERR_SOCKET_BIND;
-    }
+    //if (bind(sock, (struct sockaddr*)&addr, // TODO: fix a problem
+    //    sizeof(addr)) < 0) {
+    //    std::cout << "Socket did not bind.\n";
+    //    return err_type_server::ERR_SOCKET_BIND;
+    //}
 
     if (listen(sock, THREADS_MAX_NUMBER) < 0) {
         std::cout << "Socket did not listen.\n";

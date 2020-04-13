@@ -19,9 +19,24 @@
 #include <cstdint>
 #include <queue>
 #include <map>
+
 #include <thread>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
+#include <string>
+#include <set>
+#include <exception>
+#include <iostream>
 
 using namespace std;
+namespace pt = boost::property_tree;
+
+enum class err_type_jp {
+    ERR_OK = 0,
+    ERR_PARSE_FAILED,
+    ERR_ALL_CODES_MOUNT
+};
 
 class JJsonParser
 {
@@ -38,9 +53,8 @@ private:
     string getJsonReqQueue(void);
     /* Put JSON data to queue */
     void putJsonReqQueue(string);
-    /* Put JSON data to queue */
-    // TODO: replace error code type to unum struct
-    uint32_t parseJsonRequest(string); 
+    /* Parse JSON string */
+    err_type_jp parseJsonRequest(string jsonDoc, pt::ptree tree);
 
 public:
     /* constructor */
