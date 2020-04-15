@@ -74,7 +74,6 @@ void JJsonParser::jsonHandler(void) {
 /* UNIT_TESTS -------------------------------------------------------------- */
 #if UNIT_TEST_JSON_PARSER
 
-
 /**
  * @brief JSON parser class constructor
  */
@@ -90,7 +89,7 @@ JJsonParser::JJsonParser(string testReq, bool parsedNeed) {
             unitTestResult = true;
         }
         else if (parsedNeed) {
-
+            err_type_jp errCode = err_type_jp::ERR_OK;
 #if TEST1
             string dataForReq = "menu", dataForReq2 = "menu.popup", dataForReq3 = "menu.foo";
 #elif TEST2
@@ -98,7 +97,9 @@ JJsonParser::JJsonParser(string testReq, bool parsedNeed) {
 #elif TEST3
             string dataForReq = "foo";
 #elif TEST4
-            string dataForReq = "validation-factors.validationFactors", dataForReq2 = "password", dataForReq3 = "username";
+            string reqForValidFactors = "validationFactors", 
+                   reqForPassword = "password", 
+                   reqForUsername = "username";
 #endif /* TEST_ITEM */
 
             std::stringstream req;
@@ -109,7 +110,19 @@ JJsonParser::JJsonParser(string testReq, bool parsedNeed) {
                 pt::ptree tree;
                 pt::read_json(req, tree);
 
-                err_type_jp errCode = parseJsonRequest(dataForReq, tree);
+                errCode = parseJsonRequest(reqForValidFactors, tree);
+                if (errCode != err_type_jp::ERR_OK) {
+                    std::cout << "Database has failed.";
+                    return;
+                }
+
+                errCode = parseJsonRequest(reqForPassword, tree);
+                if (errCode != err_type_jp::ERR_OK) {
+                    std::cout << "Database has failed.";
+                    return;
+                }
+
+                errCode = parseJsonRequest(reqForUsername, tree);
                 if (errCode != err_type_jp::ERR_OK) {
                     std::cout << "Database has failed.";
                     return;
@@ -136,7 +149,7 @@ bool JJsonParser::GetUnitTestResult(void) {
 }
 #endif /* UNIT_TEST_JSON_PARSER */
 
-err_type_jp JJsonParser::parseJsonRequest(string jsonDoc, pt::ptree tree) {
+err_type_jp JJsonParser::parseJsonRequest(string jsonKey, pt::ptree tree) {
     err_type_jp errCode = err_type_jp::ERR_OK;
 
 #if JSON_PROC_PARSER_LOG
@@ -148,32 +161,18 @@ err_type_jp JJsonParser::parseJsonRequest(string jsonDoc, pt::ptree tree) {
     {
         /* If v.second.size() == 0 it means that current branch does not have any branches.
            If size is more than 0 then cuurent branch of tree has subbranch */
-        if (v.second.size() == 0) {
+        if (v.second.data().size() != 0) {
             cout << "[" << v.first.size() << "] "; /*> size is the size of defined block in structure (length of word),
             possibly size means the same of size() */
             std::cout << v.first.data() << " : ";
-            cout << "[" << v.second.size() << "] "; // number of subtrees
+            cout << "[" << v.second.data().size() << "] "; // number of subtrees
             std::cout << v.second.get<std::string>("");
             std::cout << std::endl;            
         }
         else {
-            if (tree.get_child(jsonDoc).count(v.first.data()) == 0) {
-                cout << "[" << tree.get_child(jsonDoc).count(v.first.data()) << "] ";
-                cout << v.first.data() << " : " << endl;
-                cout << "[" << v.second.size() << "] "; // number of subtrees
-                std::cout << v.second.get<std::string>("");
-            }
-            else {
-                string firstData = v.first.data();
-                cout << "[" << v.first.size() << "] "; /*> size is the size of defined block in structure (length of word),
-                possibly size means the same of size() */
-                std::cout << firstData << " : ";
-                errCode = parseJsonRequest(firstData, tree.get_child((firstData)));
-                if (errCode != err_type_jp::ERR_OK) {
-                    std::cout << "Database has failed.";
-                    return err_type_jp::ERR_PARSE_FAILED;
-                }
-            }
+            cout << "v.first.data() = " << v.first.data() << endl;
+            cout << "jsonKey = " << jsonKey << endl;
+            parseJsonRequest((v.first.data() + string(".") + jsonKey), tree.get_child(v.first.data()));
         }
     }
     std::cout << std::endl;

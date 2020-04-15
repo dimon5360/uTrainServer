@@ -31,3 +31,6 @@
 #define JSON_PROC_PUSH_PULL_LOG         0
 #define JSON_PROC_CONSTR_DESTR_LOG      0
 #define JSON_PROC_PARSER_LOG            1
+
+/* log unit tests handler */
+#define UNIT_TESTS_LOG                  0

@@ -111,11 +111,13 @@ static err_type_ut TestJsonParserTestData(void) {
     "Host : domain"
     "Content - Length : 216"*/
     sJsonTestReq = "{ \"username\": \"Dmitry\", \"password\": \"admin\", \"validation-factors\": {\
-            \"validationFactors\" : [ { \"name\" : \"remote_address\", \"value\" : \"127.0.0.1\" } ] } }";
+            \"validationFactors\" : { \"name\" : \"remote_address\", \"value\" : \"127.0.0.1\" } } }";
 
 #endif /* TEST_ITEM */
 
+#if UNIT_TESTS_LOG
     cout << sJsonTestReq << endl << endl;
+#endif /* UNIT_TESTS_LOG */
     /* test data processor in main thread */
     shared_ptr<JJsonParser> jsonProcessor = make_shared<JJsonParser>(sJsonTestReq, true);
 
