@@ -91,15 +91,13 @@ JJsonParser::JJsonParser(string testReq, bool parsedNeed) {
         else if (parsedNeed) {
             err_type_jp errCode = err_type_jp::ERR_OK;
 #if TEST1
-            string dataForReq = "menu", dataForReq2 = "menu.popup", dataForReq3 = "menu.foo";
-#elif TEST2
-            string dataForReq = "root.values";
-#elif TEST3
-            string dataForReq = "foo";
-#elif TEST4
             string reqForValidFactors = "validationFactors", 
                    reqForPassword = "password", 
                    reqForUsername = "username";
+#elif TEST2
+            string reqForValidFactors = "validationFactors",
+                reqForPassword = "password",
+                reqForUsername = "username";
 #endif /* TEST_ITEM */
 
             std::stringstream req;
@@ -110,19 +108,8 @@ JJsonParser::JJsonParser(string testReq, bool parsedNeed) {
                 pt::ptree tree;
                 pt::read_json(req, tree);
 
-                errCode = parseJsonRequest(reqForValidFactors, tree);
-                if (errCode != err_type_jp::ERR_OK) {
-                    std::cout << "Database has failed.";
-                    return;
-                }
-
-                errCode = parseJsonRequest(reqForPassword, tree);
-                if (errCode != err_type_jp::ERR_OK) {
-                    std::cout << "Database has failed.";
-                    return;
-                }
-
-                errCode = parseJsonRequest(reqForUsername, tree);
+                std::cout << "\n#1 json parser unit test.\n";
+                errCode = parseJsonRequest("", tree);
                 if (errCode != err_type_jp::ERR_OK) {
                     std::cout << "Database has failed.";
                     return;
@@ -153,29 +140,50 @@ err_type_jp JJsonParser::parseJsonRequest(string jsonKey, pt::ptree tree) {
     err_type_jp errCode = err_type_jp::ERR_OK;
 
 #if JSON_PROC_PARSER_LOG
-    //cout << "\nKey of pair : Value of pair" << endl;
+    cout << "\nKey of pair : Value of pair" << endl;
 #endif /* JSON_PROC_PARSER_LOG */
+
+    cout << "\n======== Req = " << jsonKey << endl;
 
     /* loop checks all values */
     BOOST_FOREACH(auto & v, tree)
     {
         /* If v.second.size() == 0 it means that current branch does not have any branches.
            If size is more than 0 then cuurent branch of tree has subbranch */
-        if (v.second.data().size() != 0) {
+        if (!v.second.data().empty()) {
             cout << "[" << v.first.size() << "] "; /*> size is the size of defined block in structure (length of word),
             possibly size means the same of size() */
             std::cout << v.first.data() << " : ";
             cout << "[" << v.second.data().size() << "] "; // number of subtrees
             std::cout << v.second.get<std::string>("");
-            std::cout << std::endl;            
+            std::cout << std::endl;    
         }
         else {
-            cout << "v.first.data() = " << v.first.data() << endl;
-            cout << "jsonKey = " << jsonKey << endl;
-            parseJsonRequest((v.first.data() + string(".") + jsonKey), tree.get_child(v.first.data()));
+            if (!v.first.empty()) {
+                cout << "\t[" << v.first.size() << "] "; /*> size is the size of defined block in structure (length of word),
+                possibly size means the same of size() */
+                std::cout << v.first.data() << " : <size of next data = " << tree.get_child(v.first.data()).back().first.size() << ">\n";
+                if (tree.get_child(v.first.data()).back().first.size() != 0) {
+                    errCode = parseJsonRequest((jsonKey + v.first.data() + string(".")), tree.get_child(v.first.data()));
+                    if (errCode == err_type_jp::ERR_OK) {
+                        continue;
+                    }
+                }
+                else {
+                    cout << "v.second is array\n";
+                    for (auto& e : tree.get_child(v.first.data())) {
+                        for (auto& kv : e.second) {
+                            cout << "[" << kv.first.size()  << "] " << kv.first << " : ";
+                            cout << "[" << e.second.get<std::string>(kv.first).size() << "] " << e.second.get<std::string>(kv.first) << endl;
+                        }
+                    }
+                }
+            }
+            else {
+                return err_type_jp::ERR_PARSE_FAILED;
+            }
         }
     }
-    std::cout << std::endl;
-    return err_type_jp::ERR_OK;
+    return errCode;
 
 }

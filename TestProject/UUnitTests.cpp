@@ -97,13 +97,6 @@ static err_type_ut TestJsonParserTestData(void) {
     string sJsonTestReq;
 
 #if TEST1
-    sJsonTestReq = "{ \"menu\": { \"foo\": [ \"ad \", 4, 3, 4, 5 ], \"bar\": \"true\", \"value\": 102.3E+06,\
-                     \"popup\": { \"value\": \"New\", \"onclick\": \"CreateNewDoc()\" } } }";
-#elif TEST2
-    sJsonTestReq = "{ \"root\": { \"values\": [1, 2, 3, 4, 5 ] } }";
-#elif TEST3
-    sJsonTestReq = "{ \"foo\" : \"bar\" }";
-#elif TEST4
     // TODO: HTTP request header, use it later
     /*"POST / something HTTP / 1.1"
     "Content - Type: application / json"
@@ -112,7 +105,10 @@ static err_type_ut TestJsonParserTestData(void) {
     "Content - Length : 216"*/
     sJsonTestReq = "{ \"username\": \"Dmitry\", \"password\": \"admin\", \"validation-factors\": {\
             \"validationFactors\" : { \"name\" : \"remote_address\", \"value\" : \"127.0.0.1\" } } }";
-
+#elif TEST2
+    sJsonTestReq = "{ \"active\": true, \"username\": \"Dmitry\", \"password\": \"admin\", \"validation-factors\": {\
+            \"validationFactor1\" : [ { \"name\" : \"remote_address\", \"value\" : \"127.0.0.1\" } ],\
+            \"validationFactor2\" : { \"name\" : \"main_address\", \"value\" : \"192.168.122.1\" } } }";
 #endif /* TEST_ITEM */
 
 #if UNIT_TESTS_LOG

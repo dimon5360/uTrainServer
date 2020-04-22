@@ -18,7 +18,7 @@
 #if UNIT_TESTS_ENABLE
 #define UNIT_TEST_JSON_PARSER           1
 #if UNIT_TEST_JSON_PARSER
-#define TEST4                           1
+#define TEST2                           1
 #endif /* UNIT_TEST_JSON_PARSER */
 
 
@@ -30,7 +30,7 @@
 /* log JSON processor (push, pull requests) */
 #define JSON_PROC_PUSH_PULL_LOG         0
 #define JSON_PROC_CONSTR_DESTR_LOG      0
-#define JSON_PROC_PARSER_LOG            1
+#define JSON_PROC_PARSER_LOG            0
 
 /* log unit tests handler */
 #define UNIT_TESTS_LOG                  0
