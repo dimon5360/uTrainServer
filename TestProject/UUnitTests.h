@@ -14,14 +14,14 @@
 #include "config.h"
 
 #if UNIT_TESTS_ENABLE
-/* Unit tests defines ------------------------------------------------------ */
-#define TEST_DATA_SIZE  2
 
 /* error codes for unit tests ---------------------------------------------- */
 enum class err_type_ut {
     ERR_OK = 0,
     ERR_QUEUE_FAILED,
     ERR_JSON_PARSER_FAILED,
+    ERR_DATA_BASE_CONNECTION_FAILED,
+
     ERR_ALL_CODES_MOUNT
 };
 
@@ -39,4 +39,3 @@ public:
     bool GetUnitTestsResult(void);
 };
 #endif /* UNIT_TESTS_ENABLE */
-

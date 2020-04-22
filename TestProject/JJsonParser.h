@@ -43,24 +43,22 @@ class JJsonParser
 private:
     vector<string> inputData;
     queue<string> jsonQueue;
-
+    /* Parse JSON string */
+    err_type_jp parseJsonRequest(string jsonDoc, pt::ptree tree);
+       
+public:
     /* Handle ------------------------------------- */
     /* main json thread handler */
-    void jsonHandler(void);
-
+    void jsonHandle(void);
+    /* constructor */
+    JJsonParser(void);
+    /* destructor */
+    ~JJsonParser(void);
     /* interfaces for json queue ----------------- */
     /* Get JSON data from queue */
     string getJsonReqQueue(void);
     /* Put JSON data to queue */
     void putJsonReqQueue(string);
-    /* Parse JSON string */
-    err_type_jp parseJsonRequest(string jsonDoc, pt::ptree tree);
-
-public:
-    /* constructor */
-    JJsonParser(void);
-    /* destructor */
-    ~JJsonParser(void);
     
 
 /* UNIT_TESTS -------------------------------------------------------------- */
@@ -72,7 +70,7 @@ private:
 public:
 #if UNIT_TEST_JSON_PARSER
     /* redefined constructor for unit test */
-    JJsonParser(string testReq, bool parsedNeed = false);
+    JJsonParser(string testReq);
     /* unit test result for test queue */
     bool GetUnitTestResult(void);
 #endif /* UNIT_TEST_JSON_PARSER */

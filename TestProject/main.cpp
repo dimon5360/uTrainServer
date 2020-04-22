@@ -10,8 +10,8 @@
 
 using namespace std;
 
-// v.0.0.9 Build from 22.04.2020
-static const uint32_t appVersion = 0x00000009;
+// v.0.0.10 Build from 22.04.2020
+static const uint32_t appVersion = 0x0000000A;
 
 /* private prototypes */
 static void PrintInfoApp(void);

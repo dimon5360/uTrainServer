@@ -16,10 +16,11 @@
 /* unit tests items--------------------------------------------------------- */
 #define UNIT_TESTS_ENABLE               1
 #if UNIT_TESTS_ENABLE
-#define UNIT_TEST_JSON_PARSER           1
-#if UNIT_TEST_JSON_PARSER
-#define TEST2                           1
-#endif /* UNIT_TEST_JSON_PARSER */
+/* unit tests for class JJsonParser */
+#define UNIT_TEST_JSON_PARSER           0
+
+/* unit tests for class DDataProcessor */
+#define UNIT_TEST_DATA_PROCESSOR        1
 
 
 #endif /* UNIT_TESTS_ENABLE */

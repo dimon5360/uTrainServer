@@ -48,15 +48,9 @@ private:
     void DDataBaseInit();
     /* Get request for database to receive number of active users */
     err_type_db RequestDatabaseUserNumber();
-    /* Database handler */
-    void handle();
 
-    /* Get request for database to receive first name of defined user */
-    err_type_db DDataBaseGetUserFirstName(std::string userName);
-    /* Get request for database to receive password of defined user */
-    err_type_db DDataBaseGetUserSecondName(std::string userName);
-    /* Get request for database to receive id of defined user */
-    err_type_db DDataBaseGetUserId(std::string userName);
+    /* Get request for database to receive data of defined user */
+    err_type_db DDataBaseUserDataReq(std::string req, std::string userName);
 
 
 public:
@@ -73,7 +67,8 @@ public:
     err_type_db DDataBaseGetUserData(std::string userName);
     /* TODO: */
     void DDataBaseProcRequest(std::string request, uint32_t state);
-
+    /* Database handler */
+    err_type_db handle();
 
 };
 

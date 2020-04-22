@@ -1,2 +1,8 @@
-﻿  JJsonParser.cpp
+﻿  DDataBase.cpp
+  DDataProcess.cpp
+  JJsonParser.cpp
+  SServer.cpp
+  UUnitTests.cpp
+  main.cpp
+  Создание кода...
   TestProject.vcxproj -> C:\Users\User\source\repos\TestProject\x64\Debug\TestProject.exe

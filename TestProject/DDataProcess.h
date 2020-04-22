@@ -14,18 +14,29 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <queue>
 
 
 class DDataProcess {
 
 private:
-    /* private variables */
-    std::vector<std::string> queue;
-    uint32_t queueReqsNumber = 0;
 
 public:
     /* public prototypes */
     DDataProcess();
+    DDataProcess(std::string sDatabaesRequest);
     ~DDataProcess();
+
+    /* UNIT_TESTS -------------------------------------------------------------- */
+private:
+#if UNIT_TEST_DATA_PROCESSOR
+    bool unitTestResult = false;
+#endif /* UNIT_TEST_DATA_PROCESSOR */
+
+public:
+#if UNIT_TEST_DATA_PROCESSOR
+    /* unit test result for test queue */
+    bool GetUnitTestResult(void);
+#endif /* UNIT_TEST_DATA_PROCESSOR */
 };
 
