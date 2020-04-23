@@ -37,15 +37,16 @@ void JJsonParser::putJsonReqQueue(string jsonReq) {
 #if JSON_PROC_PUSH_PULL_LOG
     cout << "Msg put to queue: " << jsonReq << endl;
 #endif /* JSON_PROC_PUSH_PULL_LOG */
-    jsonQueue.push(jsonReq);
+    jsonParserQueue.push(jsonReq);
 }
 
 /**
  * @brief Get JSON data from queue
  */
-string JJsonParser::getJsonReqQueue(void) {
+string JJsonParser::pullJsonReqQueue(void) {
     string jsonString;
-    jsonString = jsonQueue.back();
+    jsonString = jsonParserQueue.front();
+    jsonParserQueue.pop();
 #if JSON_PROC_PUSH_PULL_LOG
     cout << "Msg got from queue: " << jsonString << endl;
 #endif /* JSON_PROC_PUSH_PULL_LOG */
@@ -111,8 +112,8 @@ void JJsonParser::jsonHandle(void) {
     while (true) {
 
         /* check if queue is empty */
-        if (!jsonQueue.empty()) {
-            jsonReq = getJsonReqQueue();
+        if (!jsonParserQueue.empty()) {
+            jsonReq = pullJsonReqQueue();
 
             std::stringstream req;
             req << jsonReq;

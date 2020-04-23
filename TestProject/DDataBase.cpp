@@ -9,7 +9,9 @@
  *  @version 0.1
  */
 
-#include "DDataBase.h"
+ /* presprocessor configuration */
+#include "config.h"
+#include "main.h"
 
 /**
  * @brief DDataBase class constructor
@@ -34,6 +36,28 @@ void DDataBase::DDataBaseInit(void) {
     mysql_init(&mysql);
 }
 
+/***
+ * @brief Put new request in data base class queue
+ */
+void DDataBase::DDataBasePushRequest(std::string sDataBaseRequest) {
+#if DATA_BASE_PUSH_PULL_LOG
+    cout << "Msg put to queue: " << sDataBaseRequest << endl;
+#endif /* DATA_BASE_PUSH_PULL_LOG */
+    dataBaseQueue.push(sDataBaseRequest);
+}
+
+/***
+ * @brief Get new request from data base class queue
+ */
+std::string DDataBase::DDataBasePullRequest(void) {
+    std::string dataBaseReq;
+    dataBaseReq = dataBaseQueue.back();
+#if DATA_BASE_PUSH_PULL_LOG
+    cout << "Msg got from queue: " << dataBaseReq << endl;
+#endif /* DATA_BASE_PUSH_PULL_LOG */
+    return dataBaseReq;
+}
+
 /**
  * @brief Connect to database
  * @param hostAddr Database host ip address
@@ -49,7 +73,6 @@ err_type_db DDataBase::DDataBaseConnect(std::string hostAddr, std::string pass) 
         std::cout << mysql_error(&mysql) << std::endl;
         return err_type_db::ERR_DB_CONNECT;
     }
-    std::cout << "Database connected." << std::endl;
 
     /* db host information */
     std::string hostInfo = mysql_get_host_info(&mysql);

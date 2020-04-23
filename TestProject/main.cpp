@@ -10,8 +10,8 @@
 
 using namespace std;
 
-// v.0.0.10 Build from 22.04.2020
-static const uint32_t appVersion = 0x0000000A;
+// v.0.0.11 Build from 23.04.2020
+static const uint32_t appVersion = 0x0000000B;
 
 /* private prototypes */
 static void PrintInfoApp(void);
@@ -32,7 +32,9 @@ std::shared_ptr<JJsonParser> jsonProcessor;
 std::shared_ptr<UUnitTests> unitTests;
 #endif /* UNIT_TESTS_ENABLE */
 
-/* entry point */
+/**
+ * @brief Main method in application
+ */
 int main() {
 
     PrintInfoApp();
@@ -106,13 +108,15 @@ static void jsonProcessInit(void) {
  * @brief print application information 
  */
 static void PrintInfoApp(void) {
-    cout << "Application started. Hello %username% " << endl;
+    cout << "Hello %username% " << endl;
     cout << "Application version v." <<  boost::format("%u.%u.%u") % 
         ((appVersion>>16) & 0xFF) %
         ((appVersion>>8) & 0xFF) %
         ((appVersion) & 0xFF) << endl;
 
-    cout << "Compilation time: " << boost::format("%s %s") %
+    cout << "Compilation time: " << boost::format("%s %s\n") %
         __DATE__ % __TIME__ << endl;
+    cout << "Application started.";
+    cout << "==================================\n" << endl;
 
 }

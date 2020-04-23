@@ -9,6 +9,8 @@
  *  @version 0.1
  */
 
+ /* presprocessor configuration */
+#include "config.h"
 #include "main.h"
 /* socket prototypes */
 #include <Windows.h>

@@ -11,23 +11,11 @@
 
 #pragma once
 #include "config.h"
+#include "main.h"
 
-#include <cstring>
-#include <cstdlib>
-#include <vector>
-#include <string>
-#include <cstdint>
-#include <queue>
-#include <map>
-
-#include <thread>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
-#include <string>
-#include <set>
-#include <exception>
-#include <iostream>
 
 using namespace std;
 namespace pt = boost::property_tree;
@@ -42,7 +30,7 @@ class JJsonParser
 {
 private:
     vector<string> inputData;
-    queue<string> jsonQueue;
+    queue<string> jsonParserQueue;
     /* Parse JSON string */
     err_type_jp parseJsonRequest(string jsonDoc, pt::ptree tree);
        
@@ -56,7 +44,7 @@ public:
     ~JJsonParser(void);
     /* interfaces for json queue ----------------- */
     /* Get JSON data from queue */
-    string getJsonReqQueue(void);
+    string pullJsonReqQueue(void);
     /* Put JSON data to queue */
     void putJsonReqQueue(string);
     

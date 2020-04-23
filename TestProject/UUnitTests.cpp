@@ -9,6 +9,8 @@
  *  @version 0.4
  */
 
+ /* presprocessor configuration */
+#include "config.h"
 #include "main.h"
 
 #if UNIT_TESTS_ENABLE
@@ -28,9 +30,9 @@ static err_type_ut TestJsonDataProcExchangeTestData(void);
 
 #if UNIT_TEST_DATA_PROCESSOR
 /*  Test of connection to data base */
-static err_type_ut TestDataBaseConnection(void);
+//static err_type_ut TestDataBaseConnection(void);
 /* Test of handler data base request */
-static err_type_ut TestDataBaseHandler(void);
+static err_type_ut TestDataProcHandler(void);
 #endif /* UNIT_TEST_DATA_PROCESSOR */
 
 /* User code --------------------------------------------------------------- */
@@ -39,12 +41,16 @@ static err_type_ut TestDataBaseHandler(void);
  */
 UUnitTests::UUnitTests() {
     err_type_ut err = err_type_ut::ERR_OK;
+#if UNIT_TESTS_LOG
     std::cout << "\nUnit-testing started.";
     std::cout << "\n=================================" <<
         "================================= \n";
+#endif /* UNIT_TESTS_LOG */
     err = UnitTestsInit();
+#if UNIT_TESTS_LOG
     std::cout << "\n=================================" <<
         "================================= \n";
+#endif /* UNIT_TESTS_LOG */
     if (err != err_type_ut::ERR_OK) {
         std::cout << "Unit tests failed. Error code: " << 
             boost::format("%u") % (uint32_t)err << endl;
@@ -70,50 +76,60 @@ static err_type_ut UnitTestsInit(void) {
     err_type_ut err = err_type_ut::ERR_OK;
 
 #if UNIT_TEST_JSON_PARSER
-
+    /*  Test work of queue exchange */
+#if UNIT_TESTS_LOG
     std::cout << "\n#1 queue exchange unit test." <<
         "--------------------------------------\n\n";
+#endif /* UNIT_TESTS_LOG */
     err = TestExchangeQueue();
     if (err != err_type_ut::ERR_OK) {
         return err;
     }
-    else {
-        cout << "Unit test succeed\n";
-    }
-    
+#if UNIT_TESTS_LOG
+   cout << "Unit test succeed\n";
+#endif /* UNIT_TESTS_LOG */
+
+   /*  Test of parsing test data */
+#if UNIT_TESTS_LOG
     std::cout << "\n#2 json parser unit test." <<
         "-----------------------------------------\n\n";
+#endif /* UNIT_TESTS_LOG */
     err = TestJsonDataProcExchangeTestData();
     if (err != err_type_ut::ERR_OK) {
         return err;
     }
-    else {
-        cout << "Unit test succeed\n";
-    }
+#if UNIT_TESTS_LOG
+    cout << "Unit test succeed\n";
+#endif /* UNIT_TESTS_LOG */
 #endif /* UNIT_TEST_JSON_PARSER */
+
 
 #if UNIT_TEST_DATA_PROCESSOR
     /*  Test of connection to data base */
+#if UNIT_TESTS_LOG
     std::cout << "\n#3 data base connection unit test." <<
         "--------------------------------\n\n";
-    err = TestDataBaseConnection();
+#endif /* UNIT_TESTS_LOG */
+    /*err = TestDataBaseConnection();
     if (err != err_type_ut::ERR_OK) {
         return err;
-    }
-    else {
-        cout << "Unit test succeed\n";
-    }
+    }*/
+#if UNIT_TESTS_LOG
+    cout << "Unit test succeed\n";
+#endif /* UNIT_TESTS_LOG */
 
     /*  Test of data base handler */
+#if UNIT_TESTS_LOG
     std::cout << "\n#4 data base request handler unit test." <<
         "---------------------------\n\n";
-    err = TestDataBaseHandler();
+#endif /* UNIT_TESTS_LOG */
+    err = TestDataProcHandler();
     if (err != err_type_ut::ERR_OK) {
         return err;
     }
-    else {
-        cout << "Unit test succeed\n";
-    }
+#if UNIT_TESTS_LOG
+    cout << "Unit test succeed\n";
+#endif /* UNIT_TESTS_LOG */
 #endif /* UNIT_TEST_DATA_PROCESSOR */
 
     return err_type_ut::ERR_OK;
@@ -135,7 +151,7 @@ static err_type_ut TestExchangeQueue(void) {
         make_shared<JJsonParser>();
 
     jsonProcessor->putJsonReqQueue(sTestString);
-    string jsonReq = jsonProcessor->getJsonReqQueue();
+    string jsonReq = jsonProcessor->pullJsonReqQueue();
 
     if (jsonReq != sTestString) {
         errCode = err_type_ut::ERR_QUEUE_FAILED;
@@ -177,36 +193,40 @@ static err_type_ut TestJsonDataProcExchangeTestData(void) {
 /* Data processor unit tests =============================================== */
 #if UNIT_TEST_DATA_PROCESSOR
 /***
- * @brief Test of connection to data base
- */
-static err_type_ut TestDataBaseConnection(void) {
-    /* unit tests error type */
-    err_type_ut errCode = err_type_ut::ERR_OK;
-    /* process database requests */
-    shared_ptr<DDataProcess> dataProcessor = 
-        make_shared<DDataProcess>();
-
-    if (!dataProcessor->GetUnitTestResult()) {
-        errCode = err_type_ut::ERR_DATA_BASE_CONNECTION_FAILED;
-    }
-    return errCode;
-}
-
-/***
  * @brief Test of handler data base request
  */
-static err_type_ut TestDataBaseHandler(void) {
+static err_type_ut TestDataProcHandler(void) {
     /* unit tests error type */
     err_type_ut errCode = err_type_ut::ERR_OK;
     /* process database requests */
     shared_ptr<DDataProcess> dataProcessor =
-        make_shared<DDataProcess>("Dmitry");
+        make_shared<DDataProcess>();
+    
+    cout << "Put test data in queue.\n";
+    string sJsonTestReq = "{ \"active\": true, \"username\": \"Dmitry\", \"password\": \"admin\", \"validation-factors\": {\
+            \"validationFactor1\" : [ { \"name\" : \"remote_address\", \"value\" : \"127.0.0.1\" } ],\
+            \"validationFactor2\" : { \"name\" : \"main_address\", \"value\" : \"192.168.122.1\" } } }";
 
-    if (!dataProcessor->GetUnitTestResult()) {
-        errCode = err_type_ut::ERR_DATA_BASE_CONNECTION_FAILED;
-    }
+    dataProcessor->pushDataProcReqQueue(sJsonTestReq);
+    while (!dataProcessor->GetUnitTestResult());
     return errCode;
 }
+
+/***
+ * @brief Test of connection to data base
+ */
+ //static err_type_ut TestDataBaseConnection(void) {
+ //    /* unit tests error type */
+ //    err_type_ut errCode = err_type_ut::ERR_OK;
+ //    /* process database requests */
+ //    shared_ptr<DDataProcess> dataProcessor = 
+ //        make_shared<DDataProcess>();
+ //
+ //    if (!dataProcessor->GetUnitTestResult()) {
+ //        errCode = err_type_ut::ERR_DATA_BASE_CONNECTION_FAILED;
+ //    }
+ //    return errCode;
+ //}
 #endif /* UNIT_TEST_DATA_PROCESSOR */
 
 #endif /* UNIT_TESTS_ENABLE */

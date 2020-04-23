@@ -11,17 +11,13 @@
 
 #pragma once
 #include "config.h"
+#include "main.h"
 
-#include <iostream>
-#include <thread>
-#include <chrono>
-#include <memory>
+ /* import mysql prototypes */
 #include <mysql.h>
-#include <cstring>
-#include <cstdint>
-#include <cstdlib>
 #include <xstring>
-#include <string>
+ /* import data queue */
+#include <queue>
 
 /* error codes for data base */
 enum class err_type_db {
@@ -36,6 +32,7 @@ enum class err_type_db {
 class DDataBase
 {
 private:
+    std::queue<std::string> dataBaseQueue;
     std::string dbName;
     uint32_t dbPort;
 
@@ -65,6 +62,10 @@ public:
 
     /*  Get request for database to receive data of defined user */
     err_type_db DDataBaseGetUserData(std::string userName);
+
+    void DDataBasePushRequest(std::string sDataBaseRequest);
+    std::string DDataBasePullRequest(void);
+
     /* TODO: */
     void DDataBaseProcRequest(std::string request, uint32_t state);
     /* Database handler */
