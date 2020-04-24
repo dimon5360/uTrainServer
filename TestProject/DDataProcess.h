@@ -37,9 +37,9 @@ class DDataProcess {
 
 private:
     /* queue for input requests */
-    std::queue<std::string> inDataProcQueue;
+    std::queue<std::string> dataProcReqsQueue;
     /* queue for output reesponses */
-    std::queue<std::string> outDataProcQueue;
+    std::queue<std::string> dataProcRespsQueue;
 
     /* pointer to data base processor class */
     std::shared_ptr<DDataBase> dataBaseProcessor;
@@ -51,11 +51,18 @@ public:
     /* public prototypes */
     DDataProcess();
     ~DDataProcess();
-    
+
+    /* get new response from data process class queue */
+    void pushDataProcRespsQueue(std::string sDataProcRequest);
+    /* get new response from data process class queue */
+    std::string pullDataProcRespsQueue(void);
     /* put new request in data process class queue */
-    void pushDataProcReqQueue(std::string sDataProcRequest);
-    /* get new request from data process class queue */
-    std::string pullDataProcRespQueue(void);
+    void pushDataProcReqsQueue(std::string sDataProcRequest);
+    /* get new request in data process class queue */
+    std::string pullDataProcReqsQueue(void);
+
+    bool dataProcReqsQueueEmpty(void);
+    bool dataProcRespsQueueEmpty(void);
 
     /* UNIT_TESTS ---------------------------------------------------------- */
 private:

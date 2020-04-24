@@ -15,3 +15,5 @@
 
 #include "JJsonParser.h"
 #include "UUnitTests.h"
+
+#define THREAD_TIMEOUT 100 // ms

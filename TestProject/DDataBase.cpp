@@ -13,20 +13,38 @@
 #include "config.h"
 #include "main.h"
 
+/* data base handler thread */
+std::thread dataBaseHandlerThread;
+
 /**
  * @brief DDataBase class constructor
  */
 DDataBase::DDataBase(std::string s_name, uint32_t u_port) {
+#if DATA_BASE_CONSTR_DESTR_LOG
+    cout << " ================================== \n";
+    cout << " Data base class object created.\n";
+    cout << " ================================== \n\n";
+ #endif /* DATA_BASE_CONSTR_DESTR_LOG */
     this->dbName = s_name;
     this->dbPort = u_port;
     DDataBaseInit();
+
+    /* single thread for data base handler */
+    dataBaseHandlerThread = std::thread(&DDataBase::handle, this);
+    dataBaseHandlerThread.detach();
 }
 
 /**
  * @brief DDataBase class destructor
  */
 DDataBase::~DDataBase(void) {
+#if DATA_BASE_CONSTR_DESTR_LOG
+    cout << " ================================== \n";
+    cout << " Data base class object removed.\n";
+    cout << " ================================== \n\n";
+#endif /* DATA_BASE_CONSTR_DESTR_LOG */
     mysql_close(conn);
+    dataBaseHandlerThread.~thread();
 }
 
 /**
@@ -40,9 +58,6 @@ void DDataBase::DDataBaseInit(void) {
  * @brief Put new request in data base class queue
  */
 void DDataBase::DDataBasePushRequest(std::string sDataBaseRequest) {
-#if DATA_BASE_PUSH_PULL_LOG
-    cout << "Msg put to queue: " << sDataBaseRequest << endl;
-#endif /* DATA_BASE_PUSH_PULL_LOG */
     dataBaseQueue.push(sDataBaseRequest);
 }
 
@@ -52,9 +67,6 @@ void DDataBase::DDataBasePushRequest(std::string sDataBaseRequest) {
 std::string DDataBase::DDataBasePullRequest(void) {
     std::string dataBaseReq;
     dataBaseReq = dataBaseQueue.back();
-#if DATA_BASE_PUSH_PULL_LOG
-    cout << "Msg got from queue: " << dataBaseReq << endl;
-#endif /* DATA_BASE_PUSH_PULL_LOG */
     return dataBaseReq;
 }
 
@@ -210,12 +222,13 @@ void DDataBase::DDataBaseProcRequest(std::string request, uint32_t state) {
  * @brief Data base thread handler
  * @retval None
  */
-err_type_db DDataBase::handle() {
+void DDataBase::handle() {
 
-    err_type_db errCode = err_type_db::ERR_OK;
+    std::cout << "Data base handler thread started.\n";
+
     while (1) {
+
 
         std::this_thread::sleep_for(std::chrono::milliseconds(3));
     }
-    return errCode;
 }

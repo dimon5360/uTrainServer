@@ -12,13 +12,25 @@
 #include "config.h"
 #include "main.h"
 
+/* import thread */
+#include <thread>
+
+/* JSON parser handler thread */
+std::thread jsonParserHandlerThread;
+
 /**
  * @brief JSON parser class constructor
  */
 JJsonParser::JJsonParser(void) {
 #if JSON_PROC_CONSTR_DESTR_LOG
-    cout << "Json Parser class object removed.\n";
+    cout << " ================================== \n";
+    cout << " Json Parser class object created \n";
+    cout << " ================================== \n\n";
 #endif /* JSON_PROC_CONSTR_DESTR_LOG */
+
+    /* single thread for data base handler */
+    jsonParserHandlerThread = std::thread(&JJsonParser::handle, this);
+    jsonParserHandlerThread.detach();
 }
 
 /**
@@ -26,35 +38,114 @@ JJsonParser::JJsonParser(void) {
  */
 JJsonParser::~JJsonParser(void) {
 #if JSON_PROC_CONSTR_DESTR_LOG
-    cout << "Json Parser class object removed.\n";
+    cout << " ================================== \n";
+    cout << " Json Parser class object removed. \n";
+    cout << " ================================== \n\n";
 #endif /* JSON_PROC_CONSTR_DESTR_LOG */
+    jsonParserHandlerThread.~thread();
 }
 
 /**
- * @brief Put JSON data to queue
+ * @brief JSON parser main handler
  */
-void JJsonParser::putJsonReqQueue(string jsonReq) {
-#if JSON_PROC_PUSH_PULL_LOG
-    cout << "Msg put to queue: " << jsonReq << endl;
-#endif /* JSON_PROC_PUSH_PULL_LOG */
-    jsonParserQueue.push(jsonReq);
+void JJsonParser::handle(void) {
+
+    std::cout << "JSON parser handler thread started.\n";
+
+    string jsonReq;
+    while (true) {
+
+        /* check if queue is empty */
+        if (!jsonReqsQueueEmpty()) {
+            jsonReq = pullJsonReqsQueue();
+            procJsonRequest(jsonReq);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
+    }
 }
 
-/**
- * @brief Get JSON data from queue
+/***
+ * @brief Process input JSON doc
  */
-string JJsonParser::pullJsonReqQueue(void) {
-    string jsonString;
-    jsonString = jsonParserQueue.front();
-    jsonParserQueue.pop();
-#if JSON_PROC_PUSH_PULL_LOG
-    cout << "Msg got from queue: " << jsonString << endl;
-#endif /* JSON_PROC_PUSH_PULL_LOG */
-    return jsonString;
+void JJsonParser::procJsonRequest(string jsonDoc) {
+
+    static err_type_jp errCode = err_type_jp::ERR_OK;
+    /* string stream for JSON req in tree format */
+    static std::stringstream req;
+    /* put input json doc in string stream */
+    req << jsonDoc;
+
+    try
+    {
+        pt::ptree tree;
+        pt::read_json(req, tree);
+
+        errCode = parseJsonRequest("", tree);
+        if (errCode != err_type_jp::ERR_OK) {
+            std::cout << "JSON request parsing failed.\n";
+        }
+        else {
+            putJsonRespsQueue("JSON request parsing succeed.");
+        }
+    }
+    catch (std::exception const& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+}
+
+/***
+ * @brief Returns true if queue with requests is empty
+ */
+bool JJsonParser::jsonReqsQueueEmpty(void) {
+    return jsonParserReqsQueue.empty();
+}
+
+/***
+ * @brief Returns true if queue with responses is empty
+ */
+bool JJsonParser::jsonRespsQueueEmpty(void) {
+    return jsonParserRespsQueue.empty();
 }
 
 /**
- * @brief JSON request parser
+ * @brief Put JSON response in queue
+ */
+void JJsonParser::putJsonRespsQueue(string jsonResp) {
+    jsonParserRespsQueue.push(jsonResp);
+}
+
+/**
+ * @brief Get first JSON response from queue and then remove it
+ */
+string JJsonParser::pullJsonRespsQueue(void) {
+    static string jsonResp = "";
+    jsonResp = jsonParserRespsQueue.front();
+    jsonParserRespsQueue.pop();
+    return jsonResp;
+}
+
+/**
+ * @brief Put JSON request in queue
+ */
+void JJsonParser::putJsonReqsQueue(string jsonReq) {
+    jsonParserReqsQueue.push(jsonReq);
+}
+
+/**
+ * @brief Get first JSON request from queue and then remove it
+ */
+string JJsonParser::pullJsonReqsQueue(void) {
+    static string jsonReq = "";
+    /* get first element */
+    jsonReq = jsonParserReqsQueue.front();
+    /* remove first element */
+    jsonParserReqsQueue.pop();
+    return jsonReq;
+}
+
+/**
+ * @brief JSON request parser TODO: need to optimize this code
  */
 err_type_jp JJsonParser::parseJsonRequest(string jsonKey, pt::ptree tree) {
     err_type_jp errCode = err_type_jp::ERR_OK;
@@ -101,56 +192,10 @@ err_type_jp JJsonParser::parseJsonRequest(string jsonKey, pt::ptree tree) {
     return errCode;
 }
 
-/**
- * @brief JSON parser main handler
- */
-void JJsonParser::jsonHandle(void) {
 
-    err_type_jp errCode = err_type_jp::ERR_OK;
-
-    string jsonReq;
-    while (true) {
-
-        /* check if queue is empty */
-        if (!jsonParserQueue.empty()) {
-            jsonReq = pullJsonReqQueue();
-
-            std::stringstream req;
-            req << jsonReq;
-
-            try
-            {
-                pt::ptree tree;
-                pt::read_json(req, tree);
-
-                errCode = parseJsonRequest("", tree);
-                if (errCode != err_type_jp::ERR_OK) {
-                    std::cout << "JSON request parsing failed.\n";
-                    return;
-                }
-                else {
-                    // TODO: need top transfer this data to data processor class
-                    std::cout << "JSON request parsing succeed.\n";
-#if UNIT_TEST_JSON_PARSER
-                    unitTestResult = true;
-                    break;
-#endif /* UNIT_TEST_JSON_PARSER */
-                }
-            }
-            catch (std::exception const& e)
-            {
-                std::cerr << e.what() << std::endl;
-            }
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(3));
-    }
-}
-
-#if UNIT_TEST_JSON_PARSER
 /***
  * @brief TODO
  */
 bool JJsonParser::GetUnitTestResult(void) {
     return unitTestResult;
 }
-#endif /* UNIT_TEST_JSON_PARSER */

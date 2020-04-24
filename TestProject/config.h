@@ -16,9 +16,6 @@
 /* unit tests items--------------------------------------------------------- */
 #define UNIT_TESTS_ENABLE               1
 #if UNIT_TESTS_ENABLE
-/* unit tests for class JJsonParser */
-#define UNIT_TEST_JSON_PARSER           1
-
 /* unit tests for class DDataProcessor */
 #define UNIT_TEST_DATA_PROCESSOR        1
 
@@ -30,15 +27,17 @@
 #define LOG_FUNCTIONS_CALLS             0
 /* log JSON processor (push, pull requests) */
 #define JSON_PROC_PUSH_PULL_LOG         0
-#define JSON_PROC_CONSTR_DESTR_LOG      0
+#define JSON_PROC_CONSTR_DESTR_LOG      1
 #define JSON_PROC_PARSER_LOG            0
 
 /* log unit tests handler */
 #define UNIT_TESTS_LOG                  0
 
 /* log data processor */
-#define DATA_PROC_PUSH_PULL_LOG         1
+#define DATA_PROC_CONSTR_DESTR_LOG      1
+#define DATA_PROC_PUSH_PULL_LOG         0
 #define DATA_PROC_HANDLER_LOG           1
 
 /* log data base */
+#define DATA_BASE_CONSTR_DESTR_LOG      1
 #define DATA_BASE_PUSH_PULL_LOG         0

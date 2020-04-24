@@ -10,8 +10,10 @@
 
 using namespace std;
 
-// v.0.0.11 Build from 23.04.2020
-static const uint32_t appVersion = 0x0000000B;
+// v.0.0.12 Build from 24.04.2020
+#define MAJOR  0
+#define MINOR  0
+#define BUILD  12
 
 /* private prototypes */
 static void PrintInfoApp(void);
@@ -110,9 +112,7 @@ static void jsonProcessInit(void) {
 static void PrintInfoApp(void) {
     cout << "Hello %username% " << endl;
     cout << "Application version v." <<  boost::format("%u.%u.%u") % 
-        ((appVersion>>16) & 0xFF) %
-        ((appVersion>>8) & 0xFF) %
-        ((appVersion) & 0xFF) << endl;
+        MAJOR % MINOR % BUILD << endl;
 
     cout << "Compilation time: " << boost::format("%s %s\n") %
         __DATE__ % __TIME__ << endl;

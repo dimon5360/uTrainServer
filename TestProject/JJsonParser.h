@@ -29,38 +29,42 @@ enum class err_type_jp {
 class JJsonParser
 {
 private:
-    vector<string> inputData;
-    queue<string> jsonParserQueue;
+    queue<string> jsonParserReqsQueue;
+    queue<string> jsonParserRespsQueue;
     /* Parse JSON string */
     err_type_jp parseJsonRequest(string jsonDoc, pt::ptree tree);
+    /* Process JSON string */
+    void procJsonRequest(string jsonDoc);
        
 public:
     /* Handle ------------------------------------- */
     /* main json thread handler */
-    void jsonHandle(void);
+    void handle(void);
+
     /* constructor */
     JJsonParser(void);
     /* destructor */
     ~JJsonParser(void);
+
     /* interfaces for json queue ----------------- */
-    /* Get JSON data from queue */
-    string pullJsonReqQueue(void);
     /* Put JSON data to queue */
-    void putJsonReqQueue(string);
-    
+    void putJsonRespsQueue(string);
+    /* Put JSON data to queue */
+    void putJsonReqsQueue(string);
+    /* Get JSON data from queue */
+    string pullJsonRespsQueue(void);
+    /* Get JSON data from queue */
+    string pullJsonReqsQueue(void);
+
+    bool jsonReqsQueueEmpty(void);
+    bool jsonRespsQueueEmpty(void);
 
 /* UNIT_TESTS -------------------------------------------------------------- */
 private:
-#if UNIT_TEST_JSON_PARSER
     bool unitTestResult = false;
-#endif /* UNIT_TEST_JSON_PARSER */
 
 public:
-#if UNIT_TEST_JSON_PARSER
-    /* redefined constructor for unit test */
-    JJsonParser(string testReq);
     /* unit test result for test queue */
     bool GetUnitTestResult(void);
-#endif /* UNIT_TEST_JSON_PARSER */
        
 };
