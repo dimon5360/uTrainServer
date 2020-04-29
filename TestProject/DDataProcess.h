@@ -10,8 +10,8 @@
  */ 
 
 #pragma once
-/* presprocessor configuration */
-#include "config.h"
+ /* main classes headers */
+#include "main.h"
 /* import data base class */
 #include "DDataBase.h"
 /* import JSON parser class */

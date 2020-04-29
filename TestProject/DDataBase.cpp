@@ -9,8 +9,7 @@
  *  @version 0.1
  */
 
- /* presprocessor configuration */
-#include "config.h"
+ /* main classes headers */
 #include "main.h"
 
 /* data base handler thread */
@@ -55,6 +54,13 @@ void DDataBase::DDataBaseInit(void) {
 }
 
 /***
+ * @brief Returns true if queue is empty
+ */
+bool DDataBase::dataBaseQueueEmpty(void) {
+    return dataBaseQueue.empty();
+}
+
+/***
  * @brief Put new request in data base class queue
  */
 void DDataBase::DDataBasePushRequest(std::string sDataBaseRequest) {
@@ -66,7 +72,8 @@ void DDataBase::DDataBasePushRequest(std::string sDataBaseRequest) {
  */
 std::string DDataBase::DDataBasePullRequest(void) {
     std::string dataBaseReq;
-    dataBaseReq = dataBaseQueue.back();
+    dataBaseReq = dataBaseQueue.front();
+    dataBaseQueue.pop();
     return dataBaseReq;
 }
 

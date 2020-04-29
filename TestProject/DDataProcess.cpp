@@ -9,8 +9,7 @@
  * @version 0.1
  */
 
- /* presprocessor configuration */
-#include "config.h"
+ /* main classes headers */
 #include "main.h"
 
 /* import async */
@@ -124,7 +123,6 @@ std::string DDataProcess::pullDataProcRespsQueue(void) {
     dataProcRespsQueue.pop();
     return dataProcResp;
 }
-
 
 /***
  * @brief Put new request in data process class queue

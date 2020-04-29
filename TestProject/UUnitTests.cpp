@@ -9,8 +9,7 @@
  *  @version 0.4
  */
 
- /* presprocessor configuration */
-#include "config.h"
+ /* main classes headers */
 #include "main.h"
 
 #if UNIT_TESTS_ENABLE
@@ -22,11 +21,13 @@
 static err_type_ut UnitTestsInit(void);
 
 #if UNIT_TEST_DATA_PROCESSOR
-/*  Test of connection to data base */
-//static err_type_ut TestDataBaseConnection(void);
 /* Test of handler data base request */
 static err_type_ut TestDataProcHandler(void);
+/* Test of handler data base request */
+static err_type_ut JsonDataProcHandler(void);
 #endif /* UNIT_TEST_DATA_PROCESSOR */
+/* Test of handler data base request */
+static err_type_ut HttpReqParse(void);
 
 /* User code --------------------------------------------------------------- */
 /***
@@ -71,17 +72,41 @@ static err_type_ut UnitTestsInit(void) {
 #if UNIT_TEST_DATA_PROCESSOR
     /*  Test of data base handler */
 #if UNIT_TESTS_LOG
-    std::cout << "\n#4 data base request handler unit test." <<
+    std::cout << "\n#1 data processor request handler unit test." <<
         "---------------------------\n\n";
 #endif /* UNIT_TESTS_LOG */
     err = TestDataProcHandler();
     if (err != err_type_ut::ERR_OK) {
         return err;
     }
+
+    /*  Json data handler */
+#if UNIT_TESTS_LOG
+    std::cout << "\n#2 data processor request handler unit test." <<
+        "---------------------------\n\n";
+#endif /* UNIT_TESTS_LOG */
+    /*err = JsonDataProcHandler();
+    if (err != err_type_ut::ERR_OK) {
+        return err;
+    }*/
+
+#endif /* UNIT_TEST_DATA_PROCESSOR */
+
+#if UNIT_TEST_HTTP_HANDLER
+    /*  HTTP request parser */
+#if UNIT_TESTS_LOG
+    std::cout << "\n#2 data processor request handler unit test." <<
+        "---------------------------\n\n";
+#endif /* UNIT_TESTS_LOG */
+    err = HttpReqParse();
+    if (err != err_type_ut::ERR_OK) {
+        return err;
+    }
+#endif /* UNIT_TEST_HTTP_HANDLER */
+
 #if UNIT_TESTS_LOG
     cout << "Unit test succeed\n";
 #endif /* UNIT_TESTS_LOG */
-#endif /* UNIT_TEST_DATA_PROCESSOR */
 
     return err_type_ut::ERR_OK;
 }
@@ -111,6 +136,50 @@ static err_type_ut TestDataProcHandler(void) {
     }    
     return errCode;
 }
+
+/***
+ * @brief Test of handler data base request
+ */
+static err_type_ut JsonDataProcHandler(void) {
+    /* unit tests error type */
+    err_type_ut errCode = err_type_ut::ERR_OK;
+    /* process database requests */
+    shared_ptr<DDataProcess> dataProcessor =
+        make_shared<DDataProcess>();
+
+    string sJsonTestReq = "{ \"active\": true, \"username\": \"Dmitry\", \"password\": \"admin\", \"validation-factors\": {\
+            \"validationFactor1\" : [ { \"name\" : \"remote_address\", \"value\" : \"127.0.0.1\" } ],\
+            \"validationFactor2\" : { \"name\" : \"main_address\", \"value\" : \"192.168.122.1\" } } }";
+
+    dataProcessor->pushDataProcReqsQueue(sJsonTestReq);
+    while (1) {
+        if (!dataProcessor->dataProcRespsQueueEmpty()) {
+            cout << "\nData processor response: " << dataProcessor->pullDataProcRespsQueue() << endl;
+            break;
+        }
+    }
+    return errCode;
+}
 #endif /* UNIT_TEST_DATA_PROCESSOR */
+
+/* HTTP handler unit tests ================================================= */
+#if UNIT_TEST_HTTP_HANDLER
+/***
+ * @brief Test of handler data base request
+ */
+static err_type_ut HttpReqParse(void) {
+    /* unit tests error type */
+    err_type_hh errCode;
+    /* process database requests */
+    shared_ptr<HHttpHandler> httpHandler =
+        make_shared<HHttpHandler>();
+
+    errCode = httpHandler->procHttpRequest("");
+    if(errCode != err_type_hh::ERR_OK)
+        return err_type_ut::ERR_HTTP_HANDLER_PARSER;
+
+    return err_type_ut::ERR_OK;
+}
+#endif /* UNIT_TEST_HTTP_HANDLER */
 
 #endif /* UNIT_TESTS_ENABLE */

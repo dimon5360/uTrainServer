@@ -1,5 +1,5 @@
-﻿#include "main.h"
-#include "config.h"
+﻿/* main classes headers */
+#include "main.h"
 
 /* internal libs */
 #include <iostream>
@@ -10,10 +10,10 @@
 
 using namespace std;
 
-// v.0.0.12 Build from 24.04.2020
+// v.0.0.13 Build from 29.04.2020
 #define MAJOR  0
 #define MINOR  0
-#define BUILD  12
+#define BUILD  13
 
 /* private prototypes */
 static void PrintInfoApp(void);

@@ -10,7 +10,9 @@
  */
 
 #pragma once
+ /* presprocessor configuration */
 #include "config.h"
+ /* main classes headers */
 #include "main.h"
 
  /* import mysql prototypes */
@@ -64,6 +66,8 @@ public:
 
     void DDataBasePushRequest(std::string sDataBaseRequest);
     std::string DDataBasePullRequest(void);
+
+    bool dataBaseQueueEmpty(void);
 
     /* TODO: */
     void DDataBaseProcRequest(std::string request, uint32_t state);
