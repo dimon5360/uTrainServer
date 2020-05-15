@@ -164,6 +164,10 @@ static err_type_ut JsonDataProcHandler(void) {
 
 /* HTTP handler unit tests ================================================= */
 #if UNIT_TEST_HTTP_HANDLER
+
+#define REQUEST_2 1
+#define REQUEST_1 0
+#define REQUEST_0 0
 /***
  * @brief Test of handler data base request
  */
@@ -174,7 +178,35 @@ static err_type_ut HttpReqParse(void) {
     shared_ptr<HHttpHandler> httpHandler =
         make_shared<HHttpHandler>();
 
-    errCode = httpHandler->procHttpRequest("");
+#if REQUEST_0
+    /* example of first HTTP request */
+    std::string first_request_example =
+        "GET / HTTP/1.1\r\n"
+        "Host: developer.mozilla.org\r\n"
+        "Accept-Language: fr\r\n"
+        "\r\n"
+        "ayufgauysgf";
+#elif REQUEST_1
+    std::string first_request_example =
+        "POST /cgi/message.php HTTP/1.1\r\n"
+        "Content-Length: 5\r\n"
+        "Host: www.utrain.com\r\n"
+        "\r\n"
+        "abcde";
+#elif REQUEST_2
+    std::string jsonReq = "{\"name\": \"test_name\", \"surname\": \"test_surname\"}\r\n";
+
+    std::stringstream req;
+    req << "POST /cgi/message.php HTTP/1.1\r\n"
+        << "Content-Length: " << jsonReq.size() << "\r\n"
+        << "Content-Type: application/json; utf-8\r\n"
+        << "Host: www.utrain.com\r\n"
+        << "Accept: application/json\r\n"
+        << "\r\n"
+        << jsonReq;
+#endif /* REQUEST_ITER */
+
+    errCode = httpHandler->procHttpRequest(req.str());
     if(errCode != err_type_hh::ERR_OK)
         return err_type_ut::ERR_HTTP_HANDLER_PARSER;
 

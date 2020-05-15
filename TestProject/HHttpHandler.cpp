@@ -43,6 +43,31 @@ HHttpHandler::~HHttpHandler() {
 
 }
 
+
+/***
+ * @brief Print info about input HTTP request
+ */
+static void PrintMethodInfo(request<string_body> parseResult) {
+
+    switch (parseResult.method()) {
+
+    case http::verb::get:
+        cout << "================== GET ==================\n";
+        break;
+    case http::verb::post:
+        cout << "================== POST ==================\n";
+        break;
+    default:
+        return;
+    }
+
+    std::cout << "HTTP method : " << parseResult.method() << std::endl;
+    std::cout << "Host: " << parseResult.at("Host") << std::endl;
+    std::cout << "Content-Type: " << parseResult.at("Content-Type") << std::endl;
+    std::cout << "Accept: " << parseResult.at("Accept") << std::endl;
+    std::cout << "Body: " << parseResult.body() << std::endl;
+}
+
 /**
  * @brief HTTP data handler
  * @note If server received data then data processor takes and
@@ -77,24 +102,23 @@ void HHttpHandler::handle() {
 err_type_hh HHttpHandler::procHttpRequest(string httpReq) {
     /* unit tests error type */
     err_type_hh errCode = err_type_hh::ERR_OK;
-    std::string s =
-        "POST /cgi/message.php HTTP/1.1\r\n"
-        "Content-Length: 5\r\n"
-        "\r\n"
-        "abcde";
+
 
     boost::beast::error_code ec;
     request_parser<string_body> parser;
 
     parser.eager(true);
     
-    parser.put(boost::asio::buffer(s), ec);
+    parser.put(boost::asio::buffer(httpReq), ec);
     
     request<string_body> parseResult = parser.get();
 #if HTTP_PROC_PARSER_LOG
     std::cout << "HTTP request method: \n" << parseResult.method() << std::endl;
     std::cout << "HTTP request body: \n" << parseResult.body() << std::endl;
 #endif /* HTTP_PROC_PARSER_LOG */
+
+    /* Print information about input HTTP request */
+    PrintMethodInfo(parseResult);
 
     return errCode;
 }

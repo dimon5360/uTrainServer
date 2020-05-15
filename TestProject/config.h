@@ -45,4 +45,4 @@
 
 /* log http handler */
 #define HTTP_PROC_CONSTR_DESTR_LOG      0
-#define HTTP_PROC_PARSER_LOG            1
+#define HTTP_PROC_PARSER_LOG            0

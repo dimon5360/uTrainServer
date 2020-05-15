@@ -16,7 +16,7 @@
  /* error codes for HTTP handler class ------------------------------------- */
 enum class err_type_hh {
     ERR_OK = 0,
-
+    ERR_HTTP_METHOD_UNEXPECTED,
     ERR_ALL_CODES_MOUNT
 };
 
@@ -28,6 +28,7 @@ private:
     std::queue<std::string> httpHandlerReqsQueue;
     /* queue for http responses keeping */
     std::queue<std::string> httpHandlerRespsQueue;
+
 
 public:
     /* constructor */
