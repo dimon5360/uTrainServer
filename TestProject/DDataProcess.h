@@ -15,7 +15,7 @@
 /* import data base class */
 #include "DDataBase.h"
 /* import JSON parser class */
-#include "JJsonParser.h"
+#include "HHttpHandler.h"
 
 /* import data type string */
 #include <string>
@@ -43,7 +43,8 @@ private:
 
     /* pointer to data base processor class */
     std::shared_ptr<DDataBase> dataBaseProcessor;
-    std::shared_ptr<JJsonParser> jsonParser;
+    //std::shared_ptr<JJsonParser> jsonParser;
+    std::shared_ptr<HHttpHandler> httpHandler;
 
 public:
     /* data process handler */

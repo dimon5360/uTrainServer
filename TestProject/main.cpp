@@ -10,10 +10,10 @@
 
 using namespace std;
 
-// v.0.0.14 Build from 15.05.2020
+// v.0.0.15 Build from 18.05.2020
 #define MAJOR  0
 #define MINOR  0
-#define BUILD  14
+#define BUILD  15
 
 /* private prototypes */
 static void PrintInfoApp(void);

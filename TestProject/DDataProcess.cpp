@@ -43,9 +43,12 @@ DDataProcess::DDataProcess(void) {
     }
 
     /* initialize JSON parser handler  ===================================== */
-    jsonParser = make_shared<JJsonParser>();
+    //jsonParser = make_shared<JJsonParser>();
 
-    /* single thread for data base handler */
+    /* initialize HTTP handler  ============================================ */
+    httpHandler = make_shared<HHttpHandler>();
+
+    /* single thread for data base handler ================================= */
     dataProcHandlerThread = std::thread(&DDataProcess::handle, this);
     dataProcHandlerThread.detach();
 
@@ -74,20 +77,29 @@ DDataProcess::~DDataProcess() {
  */
 void DDataProcess::handle() {
 
-    std::string jsonResp, jsonReq;
+    std::string dataProcReq, dataProcResp;
 
     std::cout << "Data processor handler thread started.\n";
     while (1) {
         /* if data processor input queue is not empty */
         if (!dataProcReqsQueueEmpty()) {
-            std::string dataProcReq;
+#if DATA_PROC_HANDLER_LOG
+            cout << "// DataProcess queue is not empty.\n";
+#endif /* DATA_PROC_HANDLER_LOG */
             dataProcReq = pullDataProcReqsQueue();
-            jsonParser->putJsonReqsQueue(dataProcReq);
+            httpHandler->pushHttpHandlerReqsQueue(dataProcReq);
         }
         /* if json parser output queue is not empty */
-        else if (!jsonParser->jsonRespsQueueEmpty()) {
-            jsonResp = jsonParser->pullJsonRespsQueue();
-            pushDataProcRespsQueue(jsonResp);
+        else if (!httpHandler->httpHandlerRespsQueueEmpty()) {
+#if DATA_PROC_HANDLER_LOG
+            cout << "// Got answer from HTTP handler: ";
+#endif /* DATA_PROC_HANDLER_LOG */
+            dataProcResp = httpHandler->pullHttpHandlerRespsQueue();
+#if DATA_PROC_HANDLER_LOG
+            cout << "\"" << dataProcResp << "\"" << endl <<
+                "// Need to send the answer in DataProcess queue.\n";
+#endif /* DATA_PROC_HANDLER_LOG */
+            pushDataProcRespsQueue(dataProcResp);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
     }

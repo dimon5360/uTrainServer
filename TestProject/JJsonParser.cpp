@@ -82,10 +82,12 @@ void JJsonParser::procJsonRequest(string jsonDoc) {
 
         errCode = parseJsonRequest("", tree);
         if (errCode != err_type_jp::ERR_OK) {
+#if JSON_PROC_PARSER_LOG
             std::cout << "JSON request parsing failed.\n";
+#endif /* JSON_PROC_PARSER_LOG */
         }
         else {
-            putJsonRespsQueue("JSON request parsing succeed.");
+            pushJsonRespsQueue("JSON request parsing succeed.");
         }
     }
     catch (std::exception const& e)
@@ -111,7 +113,7 @@ bool JJsonParser::jsonRespsQueueEmpty(void) {
 /**
  * @brief Put JSON response in queue
  */
-void JJsonParser::putJsonRespsQueue(string jsonResp) {
+void JJsonParser::pushJsonRespsQueue(string jsonResp) {
     jsonParserRespsQueue.push(jsonResp);
 }
 
@@ -128,7 +130,7 @@ string JJsonParser::pullJsonRespsQueue(void) {
 /**
  * @brief Put JSON request in queue
  */
-void JJsonParser::putJsonReqsQueue(string jsonReq) {
+void JJsonParser::pushJsonReqsQueue(string jsonReq) {
     jsonParserReqsQueue.push(jsonReq);
 }
 

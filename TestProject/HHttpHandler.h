@@ -13,6 +13,9 @@
  /* main classes headers */
 #include "main.h"
 
+/* import JSON parser class */
+#include "JJsonParser.h"
+
  /* error codes for HTTP handler class ------------------------------------- */
 enum class err_type_hh {
     ERR_OK = 0,
@@ -28,6 +31,8 @@ private:
     std::queue<std::string> httpHandlerReqsQueue;
     /* queue for http responses keeping */
     std::queue<std::string> httpHandlerRespsQueue;
+
+    std::shared_ptr<JJsonParser> jsonParser;
 
 
 public:

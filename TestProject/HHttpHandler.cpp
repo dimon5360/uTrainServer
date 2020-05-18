@@ -15,9 +15,12 @@
 //#include <boost/beast.hpp>
 #include <boost/beast/http/parser.hpp> 
 #include <boost_1_72_0_b1_rc2\boost\beast\http\string_body.hpp>
-using namespace boost::beast::http;
 
+using namespace boost::beast::http;
 namespace http = boost::beast::http;
+
+/* data processor handler thread */
+std::thread httpHandlerThread;
 
 /**
  * @brief HTTP data hadnler class constructor
@@ -29,6 +32,12 @@ HHttpHandler::HHttpHandler() {
     cout << " ================================== \n\n";
 #endif /* HTTP_PROC_CONSTR_DESTR_LOG */
 
+    /* initialize JSON parser handler  ===================================== */
+    jsonParser = make_shared<JJsonParser>();
+    
+    /* single thread for HTTP handler */
+    httpHandlerThread = std::thread(&HHttpHandler::handle, this);
+    httpHandlerThread.detach();
 }
 
 /**
@@ -80,17 +89,30 @@ static void PrintMethodInfo(request<string_body> parseResult) {
 void HHttpHandler::handle() {
 
     std::string jsonResp, jsonReq;
+    err_type_hh errCode = err_type_hh::ERR_OK;
 
-    std::cout << "Data processor handler thread started.\n";
+    std::cout << "HTTP handler thread started.\n";
     while (1) {
         /* if data processor input queue is not empty */
         if (!httpHandlerReqsQueueEmpty()) {
+#if HTTP_PROC_PARSER_LOG
+            cout << "// HTTP reqs handler queue is not empty.\n";
+#endif /* HTTP_PROC_PARSER_LOG */
             std::string httpReq;
             httpReq = pullHttpHandlerReqsQueue();
-            // TODO: process HTTP request
-            // and push response in queue
-            procHttpRequest(httpReq);
-            break;
+            errCode = procHttpRequest(httpReq);
+        }
+        else if (!jsonParser->jsonRespsQueueEmpty()) {
+#if HTTP_PROC_PARSER_LOG
+            cout << "// Got answer from JSON parser: ";
+#endif /* HTTP_PROC_PARSER_LOG */
+            jsonResp = jsonParser->pullJsonRespsQueue();
+#if HTTP_PROC_PARSER_LOG
+            cout << "\"" << jsonResp << "\"" << endl <<
+                "// Need to send the answer from JSON parser "
+                "to HTTP handler queue.\n";
+#endif /* HTTP_PROC_PARSER_LOG */
+            pushHttpHandlerRespsQueue(jsonResp);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
     }
@@ -119,6 +141,11 @@ err_type_hh HHttpHandler::procHttpRequest(string httpReq) {
 
     /* Print information about input HTTP request */
     PrintMethodInfo(parseResult);
+
+#if HTTP_PROC_PARSER_LOG
+    cout << "// Resend to JSON parser.\n";
+#endif /* HTTP_PROC_PARSER_LOG */
+    jsonParser->pushJsonReqsQueue(parseResult.body());
 
     return errCode;
 }

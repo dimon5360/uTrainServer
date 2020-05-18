@@ -17,8 +17,8 @@
 #define UNIT_TESTS_ENABLE               1
 #if UNIT_TESTS_ENABLE
 /* unit tests for class DDataProcessor */
-#define UNIT_TEST_DATA_PROCESSOR        0
-#define UNIT_TEST_HTTP_HANDLER          1
+#define UNIT_TEST_DATA_PROCESSOR        1
+#define UNIT_TEST_HTTP_HANDLER          0
 
 
 #endif /* UNIT_TESTS_ENABLE */

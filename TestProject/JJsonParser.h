@@ -48,9 +48,9 @@ public:
 
     /* interfaces for json queue ----------------- */
     /* Put JSON data to queue */
-    void putJsonRespsQueue(string);
+    void pushJsonRespsQueue(string);
     /* Put JSON data to queue */
-    void putJsonReqsQueue(string);
+    void pushJsonReqsQueue(string);
     /* Get JSON data from queue */
     string pullJsonRespsQueue(void);
     /* Get JSON data from queue */
