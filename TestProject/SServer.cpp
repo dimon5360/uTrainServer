@@ -12,16 +12,14 @@
  /* main classes headers */
 #include "main.h"
 
-//#include <winsock2.h>
-
-/* socket prototypes */
-#include <Windows.h>
-
 std::thread t[THREADS_MAX_NUMBER];
 uint32_t countThread = 0;
 std::thread tcpServerMainThread;
 
+#if USE_BOOST 
 #include <boost/format.hpp> // boost library
+#endif /* USE_BOOST */
+
 /**
  * @brief server class constructor
  */
@@ -58,10 +56,13 @@ SServer::~SServer() {
 #endif /* TCP_SERVER_CALLED_FUNCTION */
 
     tcpServerMainThread.~thread();
+#if USE_BOOST 
 
+#else 
     /* stop tcp socket server */
     closesocket(sock);
     WSACleanup();
+#endif /* USE_BOOST */
     ConsoleInfo("Server was stoped. You can close the application.");
 }
 
@@ -73,6 +74,10 @@ err_type_server SServer::SServerInit(void) {
     ConsoleFunctionNameLog(__FUNCTION__);
 #endif /* TCP_SERVER_CALLED_FUNCTION */
 
+#if USE_BOOST 
+
+
+#else 
     /* init winsock dll */
     if (WSAStartup(MAKEWORD(2, 2), &wData) != 0) {
         return err_type_server::ERR_INIT_WSA;
@@ -83,23 +88,23 @@ err_type_server SServer::SServerInit(void) {
     if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
         std::cout << "Error socket opening. Socket is " << sock << std::endl;
         return err_type_server::ERR_INIT_SOCKET;
-    } 
+    }
 
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port = htons(port);
 
-    /*if (bind(sock, (struct sockaddr*) & addr, // TODO: fix a problem
+    if (bind(sock, (struct sockaddr*) & addr, // TODO: fix a problem
         sizeof(addr)) < 0) {
         std::cout << "Socket did not bind.\n";
         return err_type_server::ERR_SOCKET_BIND;
-    }*/
+    }
 
     if (listen(sock, THREADS_MAX_NUMBER) < 0) {
         std::cout << "Socket did not listen.\n";
         return err_type_server::ERR_SOCKET_LISTEN;
     }
-
+#endif /* USE_BOOST */
     return err_type_server::ERR_OK;
 }
 
@@ -131,7 +136,7 @@ void SServer::handle() {
                 ntohs(addr_c.sin_port));
 
             /* create thread for each tcp client */
-            t[countThread] = std::thread( CreateNewThread, acceptS[sockCount], addr_c );
+            t[countThread] = std::thread( &SServer::processConnection, this, acceptS[sockCount], addr_c );
             /* thread exists while server works */
             t[countThread++].detach();
             std::cout << "Client #" << sockCount++ << std::endl;
@@ -143,7 +148,7 @@ void SServer::handle() {
 /**
  * @brief create new thread for new client
  */
-void CreateNewThread(SOCKET s, SOCKADDR_IN addr) {
+void SServer::processConnection(SOCKET s, SOCKADDR_IN addr) {
 #if TCP_SERVER_CALLED_FUNCTION
     ConsoleFunctionNameLog(__FUNCTION__);
 #endif /* TCP_SERVER_CALLED_FUNCTION */
@@ -157,7 +162,7 @@ void CreateNewThread(SOCKET s, SOCKADDR_IN addr) {
             std::stringstream resp;
             std::stringstream resp_body;
 
-            std::cout << "========================================\n";
+            /*std::cout << "========================================\n";
             std::cout << "HTTP request: \n";
             std::cout << std::string(buf) << std::endl;
 
@@ -170,7 +175,7 @@ void CreateNewThread(SOCKET s, SOCKADDR_IN addr) {
                 send(s, resp.str().c_str(), (int)resp.str().length(), 0);
                 break;
             }
-            else {
+            else {*/
                 /* prepare test html page for new client */
                 std::cout << "========================================\n";
                 std::cout << "HTTP response: \n";
@@ -190,13 +195,11 @@ void CreateNewThread(SOCKET s, SOCKADDR_IN addr) {
                 //resp << "Unknown user.";
                 std::cout << resp.str() << std::endl;
                 send(s, resp.str().c_str(), (int)resp.str().length(), 0);
-            }
+            //}
 
             memset(buf, 0x00, 1024);
 
-             /* send test html page */
-             //send(s, resp.str().c_str(), (int)resp.str().length(), 0);
-             std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
@@ -212,3 +215,4 @@ void CreateNewThread(SOCKET s, SOCKADDR_IN addr) {
         }
     }
 }
+

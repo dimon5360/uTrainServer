@@ -1,7 +1,11 @@
-﻿  UUnitTests.cpp
+﻿  SServer.cpp
+  Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately. For example:
+  - add -D_WIN32_WINNT=0x0601 to the compiler command line; or
+  - add _WIN32_WINNT=0x0601 to your project's Preprocessor Definitions.
+  Assuming _WIN32_WINNT=0x0601 (i.e. Windows 7 target).
   Создание кода
-  10 of 2640 functions ( 0.4%) were compiled, the rest were copied from previous compilation.
+  60 of 1648 functions ( 3.6%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    26 functions had inline decision re-evaluated but remain unchanged
+    31 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
   TestProject.vcxproj -> C:\Users\User\source\repos\TestProject\x64\Release\TestProject.exe

@@ -22,8 +22,6 @@ static err_type_ut UnitTestsInit(void);
 
 /* Test of HTTP request handler */
 static err_type_ut HttpDataProcHandlerTest(void);
-/* Test of data base request handler */
-static err_type_ut HttpReqParseTest(void);
 /* Test of TCP server connection handler */
 static err_type_ut GetHttpReqAndTransferToHandlerTest(void);
 
@@ -64,15 +62,6 @@ static err_type_ut UnitTestsInit(void) {
         return err;
     }
 #endif /* UNIT_TEST_DATA_PROCESSOR */
-
-#if UNIT_TEST_HTTP_HANDLER
-#if UNIT_TESTS_LOG
-#endif /* UNIT_TESTS_LOG */
-    err = HttpReqParseTest();
-    if (err != err_type_ut::ERR_OK) {
-        return err;
-    }
-#endif /* UNIT_TEST_HTTP_HANDLER */
 
 #if UNIT_TEST_SERVER_DATA_PROC
     /* Test TCP server connection handler */
@@ -122,37 +111,6 @@ static err_type_ut HttpDataProcHandlerTest(void) {
     return errCode;
 }
 #endif /* UNIT_TEST_DATA_PROCESSOR */
-
-/* HTTP handler unit tests ================================================= */
-#if UNIT_TEST_HTTP_HANDLER
-
-/***
- * @brief Test of data base request handler
- */
-static err_type_ut HttpReqParseTest(void) {
-    /* unit tests error type */
-    err_type_hh errCode;
-    /* process database requests */
-    shared_ptr<HHttpHandler> httpHandler =
-        make_shared<HHttpHandler>();
-    std::string jsonReq = "{\"name\": \"test_name\", \"surname\": \"test_surname\"}\r\n";
-
-    std::stringstream req;
-    req << "POST /cgi/message.php HTTP/1.1\r\n"
-        << "Content-Length: " << jsonReq.size() << "\r\n"
-        << "Content-Type: application/json; utf-8\r\n"
-        << "Host: www.utrain.com\r\n"
-        << "Accept: application/json\r\n"
-        << "\r\n"
-        << jsonReq;
-
-    errCode = httpHandler->procHttpRequest(req.str());
-    if(errCode != err_type_hh::ERR_OK)
-        return err_type_ut::ERR_HTTP_HANDLER_PARSER;
-
-    return err_type_ut::ERR_OK;
-}
-#endif /* UNIT_TEST_HTTP_HANDLER */
 
 /* TCP server unit tests =================================================== */
 #if UNIT_TEST_SERVER_DATA_PROC

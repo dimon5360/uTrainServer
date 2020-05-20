@@ -17,21 +17,21 @@
 #include <iostream>
 /* import for multythreading */
 #include <thread>
-/*#include <memory>
-#include <cstring>
-#include <cstdint>
-#include <cstdlib>
-#include <xstring>
-#include <string>
-#include <vector>
+#include <memory>
 #include <chrono>
-#include <sstream>*/
+#include <sstream>
+
+#define USE_BOOST 1
 
 /* tcp stack */
-#if !NEW_REALIZATION
+#if USE_BOOST
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+
+#else
 #include "winsock.h"
 #pragma comment(lib, "ws2_32.lib")
-#endif
+#endif /* !USE_BOOST */
 
 /*  max number of threads */
 #define THREADS_MAX_NUMBER  10
@@ -64,12 +64,10 @@ private:
     /* private prototypes */
     err_type_server SServerInit(void);
     void handle(void);
+    void processConnection(SOCKET s, SOCKADDR_IN addr);
 
 public:
     /* public prototypes */
     SServer(std::string s_ip, uint16_t s_port);
     ~SServer();
 };
-
-/* main server thread handler */
-extern void CreateNewThread(SOCKET s, SOCKADDR_IN addr);
