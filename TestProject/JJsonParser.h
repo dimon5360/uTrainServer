@@ -32,7 +32,7 @@ private:
     queue<string> jsonParserReqsQueue;
     queue<string> jsonParserRespsQueue;
     /* Parse JSON string */
-    err_type_jp parseJsonRequest(string jsonDoc, pt::ptree tree);
+    err_type_jp parseJsonRequest(string jsonDoc, pt::ptree tree, std::string offset);
     /* Process JSON string */
     void procJsonRequest(string jsonDoc);
        

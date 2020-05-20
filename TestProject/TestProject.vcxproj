@@ -172,6 +172,7 @@
     <ClCompile Include="JJsonParser.cpp" />
     <ClCompile Include="SServer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="utils.cpp" />
     <ClCompile Include="UUnitTests.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -182,8 +183,13 @@
     <ClInclude Include="HHttpHandler.h" />
     <ClInclude Include="JJsonParser.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SServer.h" />
+    <ClInclude Include="utils.h" />
     <ClInclude Include="UUnitTests.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TestProject.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

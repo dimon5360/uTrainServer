@@ -9,22 +9,69 @@
  *  @version 0.1
  */
 
- /* presprocessor configuration */
-#include "config.h"
+ /* main classes headers */
 #include "main.h"
+
+//#include <winsock2.h>
+
 /* socket prototypes */
 #include <Windows.h>
 
 std::thread t[THREADS_MAX_NUMBER];
 uint32_t countThread = 0;
+std::thread tcpServerMainThread;
+
+#include <boost/format.hpp> // boost library
+/**
+ * @brief server class constructor
+ */
+SServer::SServer(std::string s_ip, uint16_t s_port) {
+#if TCP_SERVER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* TCP_SERVER_CALLED_FUNCTION */
+
+    cout << "TCP server IP : " << boost::format("%s:%u") %
+        s_ip % s_port << endl;
+
+    /* init tcp ip address */
+    this->port = s_port;
+    /* init tcp ip port */
+    this->ip = s_ip;
+
+    err_type_server err = SServerInit();
+    if (err != err_type_server::ERR_OK) {
+        ConsoleError("Initialization of TCP server failed.");
+        return;
+    }
+       
+    /* single thread for HTTP handler */
+    tcpServerMainThread = std::thread(&SServer::handle, this);
+    tcpServerMainThread.detach();
+}
+
+/**
+ * @brief server class destructor
+ */
+SServer::~SServer() {
+#if TCP_SERVER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* TCP_SERVER_CALLED_FUNCTION */
+
+    tcpServerMainThread.~thread();
+
+    /* stop tcp socket server */
+    closesocket(sock);
+    WSACleanup();
+    ConsoleInfo("Server was stoped. You can close the application.");
+}
 
 /**
  * @brief initialize TCP server 
  */
 err_type_server SServer::SServerInit(void) {
-#if LOG_FUNCTIONS_CALLS
-    cout << __FUNCTION__ << endl;
-#endif
+#if TCP_SERVER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* TCP_SERVER_CALLED_FUNCTION */
 
     /* init winsock dll */
     if (WSAStartup(MAKEWORD(2, 2), &wData) != 0) {
@@ -42,18 +89,17 @@ err_type_server SServer::SServerInit(void) {
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port = htons(port);
 
-    //if (bind(sock, (struct sockaddr*)&addr, // TODO: fix a problem
-    //    sizeof(addr)) < 0) {
-    //    std::cout << "Socket did not bind.\n";
-    //    return err_type_server::ERR_SOCKET_BIND;
-    //}
+    /*if (bind(sock, (struct sockaddr*) & addr, // TODO: fix a problem
+        sizeof(addr)) < 0) {
+        std::cout << "Socket did not bind.\n";
+        return err_type_server::ERR_SOCKET_BIND;
+    }*/
 
     if (listen(sock, THREADS_MAX_NUMBER) < 0) {
         std::cout << "Socket did not listen.\n";
         return err_type_server::ERR_SOCKET_LISTEN;
     }
 
-    handle();
     return err_type_server::ERR_OK;
 }
 
@@ -62,9 +108,10 @@ err_type_server SServer::SServerInit(void) {
  * @brief server socket handler 
  */
 void SServer::handle() {
-#if LOG_FUNCTIONS_CALLS
-    cout << __FUNCTION__ << endl;
-#endif
+#if TCP_SERVER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* TCP_SERVER_CALLED_FUNCTION */
+
     SOCKET acceptS[THREADS_MAX_NUMBER] = { INVALID_SOCKET }, tempSock;
     uint32_t sockCount = 0;
     SOCKADDR_IN addr_c;
@@ -89,7 +136,7 @@ void SServer::handle() {
             t[countThread++].detach();
             std::cout << "Client #" << sockCount++ << std::endl;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(3));
+        std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
     }
 }
 
@@ -97,9 +144,10 @@ void SServer::handle() {
  * @brief create new thread for new client
  */
 void CreateNewThread(SOCKET s, SOCKADDR_IN addr) {
-#if LOG_FUNCTIONS_CALLS
-    cout << __FUNCTION__ << endl;
-#endif
+#if TCP_SERVER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* TCP_SERVER_CALLED_FUNCTION */
+
     char buf[1024] = { 0 };
     int recvLen = 0;
     std::cout << std::this_thread::get_id() << std::endl;
@@ -163,38 +211,4 @@ void CreateNewThread(SOCKET s, SOCKADDR_IN addr) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
-}
-
-#include <boost/format.hpp> // boost library
-/**
- * @brief server class constructor 
- */
-SServer::SServer(std::string s_ip, uint16_t s_port) {
-#if LOG_FUNCTIONS_CALLS
-    cout << __FUNCTION__ << endl;
-#endif
-    cout << "TCP server IP : " << boost::format("%s:%u") %
-        s_ip % s_port << endl;
-
-    /* init tcp ip address */
-    this-> port = s_port;
-    /* init tcp ip port */
-    this->ip = s_ip;
-    err_type_server err = SServerInit();
-    if (err != err_type_server::ERR_OK) {
-        std::cout << "Initialization of TCP server failed." << std::endl;
-    }
-}
-
-/**
- * @brief server class destructor
- */
-SServer::~SServer() {
-#if LOG_FUNCTIONS_CALLS
-    cout << __FUNCTION__ << endl;
-#endif
-    /* stop tcp socket server */
-    closesocket(sock);
-    WSACleanup();
-    std::cout << "Server was stoped. You can close app" << std::endl;
 }

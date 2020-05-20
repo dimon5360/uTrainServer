@@ -20,4 +20,7 @@
 #include "HHttpHandler.h"
 #include "UUnitTests.h"
 
+/* for formatted output */
+#include "utils.h"
+
 #define THREAD_TIMEOUT 100 // ms

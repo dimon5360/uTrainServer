@@ -10,21 +10,22 @@
  */
 
 #pragma once
+ /* main classes headers */
+#include "main.h"
 
-#include "DDataBase.h"
-#include "config.h"
-
-#include <memory>
+/* import for console log */
+#include <iostream>
+/* import for multythreading */
+#include <thread>
+/*#include <memory>
 #include <cstring>
 #include <cstdint>
 #include <cstdlib>
 #include <xstring>
 #include <string>
-#include <thread>
 #include <vector>
 #include <chrono>
-#include <iostream>
-#include <sstream>
+#include <sstream>*/
 
 /* tcp stack */
 #if !NEW_REALIZATION

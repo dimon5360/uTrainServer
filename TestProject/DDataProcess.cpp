@@ -24,9 +24,7 @@ std::thread dataProcHandlerThread;
  */
 DDataProcess::DDataProcess(void) {
 #if DATA_PROC_CONSTR_DESTR_LOG
-    cout << " ================================== \n";
-    cout << " Data processor class object created.\n";
-    cout << " ================================== \n\n";
+    ConsoleInfo("Data processor class object created.");
 #endif /* DATA_PROC_CONSTR_DESTR_LOG */
     err_type_db errCode = err_type_db::ERR_OK;
 
@@ -35,15 +33,9 @@ DDataProcess::DDataProcess(void) {
     /* connect to user databse */
     errCode = dataBaseProcessor->DDataBaseConnect("localhost", "adM1n34#184");
     if (errCode != err_type_db::ERR_OK) {
-        std::cout << "Database connection has been failed.\n";
+        ConsoleError("Database connection has been failed.");
         return;
     }
-    else {
-        std::cout << "Database has  been connected.\n";
-    }
-
-    /* initialize JSON parser handler  ===================================== */
-    //jsonParser = make_shared<JJsonParser>();
 
     /* initialize HTTP handler  ============================================ */
     httpHandler = make_shared<HHttpHandler>();
@@ -59,9 +51,7 @@ DDataProcess::DDataProcess(void) {
  */
 DDataProcess::~DDataProcess() {
 #if DATA_PROC_CONSTR_DESTR_LOG
-    cout << " ================================== \n";
-    cout << " Data processor class object removed.\n";
-    cout << " ================================== \n\n";
+    ConsoleInfo("Data processor class object removed.");
 #endif /* DATA_PROC_CONSTR_DESTR_LOG */
     dataProcHandlerThread.~thread();
 }
@@ -77,29 +67,33 @@ DDataProcess::~DDataProcess() {
  */
 void DDataProcess::handle() {
 
-    std::string dataProcReq, dataProcResp;
+    std::string httpHandlerReq, httpHandlerResp;
 
-    std::cout << "Data processor handler thread started.\n";
+#if DATA_PROC_HANDLER_LOG
+    ConsoleInfo("Data processor handler thread started.");
+#endif /* DATA_PROC_HANDLER_LOG */
+
     while (1) {
         /* if data processor input queue is not empty */
         if (!dataProcReqsQueueEmpty()) {
 #if DATA_PROC_HANDLER_LOG
-            cout << "// DataProcess queue is not empty.\n";
+            ConsoleComment("DataProcess queue is not empty.");
 #endif /* DATA_PROC_HANDLER_LOG */
-            dataProcReq = pullDataProcReqsQueue();
-            httpHandler->pushHttpHandlerReqsQueue(dataProcReq);
+            httpHandlerReq = pullDataProcReqsQueue();
+            httpHandler->pushHttpHandlerReqsQueue(httpHandlerReq);
         }
         /* if json parser output queue is not empty */
         else if (!httpHandler->httpHandlerRespsQueueEmpty()) {
 #if DATA_PROC_HANDLER_LOG
-            cout << "// Got answer from HTTP handler: ";
+            ConsoleComment("HTTP handler responses queue is not empty.");
 #endif /* DATA_PROC_HANDLER_LOG */
-            dataProcResp = httpHandler->pullHttpHandlerRespsQueue();
+            httpHandlerResp = httpHandler->pullHttpHandlerRespsQueue();
 #if DATA_PROC_HANDLER_LOG
-            cout << "\"" << dataProcResp << "\"" << endl <<
-                "// Need to send the answer in DataProcess queue.\n";
+            ConsoleComment("Need to send the answer " + string("\"") +
+                httpHandlerResp + string("\" ") + "from HTTP handler queue"
+                "to DataProcess responses queue.");
 #endif /* DATA_PROC_HANDLER_LOG */
-            pushDataProcRespsQueue(dataProcResp);
+            pushDataProcRespsQueue(httpHandlerResp);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
     }

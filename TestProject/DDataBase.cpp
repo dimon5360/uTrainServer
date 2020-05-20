@@ -20,9 +20,7 @@ std::thread dataBaseHandlerThread;
  */
 DDataBase::DDataBase(std::string s_name, uint32_t u_port) {
 #if DATA_BASE_CONSTR_DESTR_LOG
-    cout << " ================================== \n";
-    cout << " Data base class object created.\n";
-    cout << " ================================== \n\n";
+    ConsoleInfo("Data base class object created.");
  #endif /* DATA_BASE_CONSTR_DESTR_LOG */
     this->dbName = s_name;
     this->dbPort = u_port;
@@ -38,9 +36,7 @@ DDataBase::DDataBase(std::string s_name, uint32_t u_port) {
  */
 DDataBase::~DDataBase(void) {
 #if DATA_BASE_CONSTR_DESTR_LOG
-    cout << " ================================== \n";
-    cout << " Data base class object removed.\n";
-    cout << " ================================== \n\n";
+    ConsoleInfo("Data base class object removed.");
 #endif /* DATA_BASE_CONSTR_DESTR_LOG */
     mysql_close(conn);
     dataBaseHandlerThread.~thread();
@@ -231,7 +227,9 @@ void DDataBase::DDataBaseProcRequest(std::string request, uint32_t state) {
  */
 void DDataBase::handle() {
 
-    std::cout << "Data base handler thread started.\n";
+#if DATA_BASE_HANDLER_LOG
+    ConsoleInfo("Data base handler thread started.");
+#endif /* DATA_BASE_HANDLER_LOG */
 
     while (1) {
 

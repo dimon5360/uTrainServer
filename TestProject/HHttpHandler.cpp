@@ -12,7 +12,6 @@
  /* main classes headers */
 #include "main.h"
 
-//#include <boost/beast.hpp>
 #include <boost/beast/http/parser.hpp> 
 #include <boost_1_72_0_b1_rc2\boost\beast\http\string_body.hpp>
 
@@ -27,9 +26,7 @@ std::thread httpHandlerThread;
  */
 HHttpHandler::HHttpHandler() {
 #if HTTP_PROC_CONSTR_DESTR_LOG
-    cout << " ================================== \n";
-    cout << " HTTP handler class object created.\n";
-    cout << " ================================== \n\n";
+    ConsoleInfo("HTTP handler class object created.");
 #endif /* HTTP_PROC_CONSTR_DESTR_LOG */
 
     /* initialize JSON parser handler  ===================================== */
@@ -45,11 +42,9 @@ HHttpHandler::HHttpHandler() {
  */
 HHttpHandler::~HHttpHandler() {
 #if HTTP_PROC_CONSTR_DESTR_LOG
-    cout << " ================================== \n";
-    cout << " HTTP handler class object removed.\n";
-    cout << " ================================== \n\n";
+    ConsoleInfo("HTTP handler class object removed.");
 #endif /* HTTP_PROC_CONSTR_DESTR_LOG */
-
+    httpHandlerThread.~thread();
 }
 
 
@@ -57,24 +52,34 @@ HHttpHandler::~HHttpHandler() {
  * @brief Print info about input HTTP request
  */
 static void PrintMethodInfo(request<string_body> parseResult) {
+#if HTTP_HANDLER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* HTTP_HANDLER_CALLED_FUNCTION */
 
     switch (parseResult.method()) {
 
     case http::verb::get:
+#if HTTP_PROC_PARSER_LOG
         cout << "================== GET ==================\n";
+#endif /* HTTP_PROC_PARSER_LOG */
         break;
     case http::verb::post:
+#if HTTP_PROC_PARSER_LOG
         cout << "================== POST ==================\n";
+#endif /* HTTP_PROC_PARSER_LOG */
         break;
     default:
         return;
     }
 
+#if HTTP_PROC_PARSER_LOG
+    /* this is not a log, need to realize parser for these data */
     std::cout << "HTTP method : " << parseResult.method() << std::endl;
     std::cout << "Host: " << parseResult.at("Host") << std::endl;
     std::cout << "Content-Type: " << parseResult.at("Content-Type") << std::endl;
     std::cout << "Accept: " << parseResult.at("Accept") << std::endl;
     std::cout << "Body: " << parseResult.body() << std::endl;
+#endif /* HTTP_PROC_PARSER_LOG */
 }
 
 /**
@@ -87,31 +92,37 @@ static void PrintMethodInfo(request<string_body> parseResult) {
  *
  */
 void HHttpHandler::handle() {
+#if HTTP_HANDLER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* HTTP_HANDLER_CALLED_FUNCTION */
 
     std::string jsonResp, jsonReq;
     err_type_hh errCode = err_type_hh::ERR_OK;
 
-    std::cout << "HTTP handler thread started.\n";
+#if HTTP_HANDLER_LOG
+    ConsoleInfo("HTTP handler thread started.");
+#endif /* HTTP_HANDLER_LOG */
+
     while (1) {
         /* if data processor input queue is not empty */
         if (!httpHandlerReqsQueueEmpty()) {
-#if HTTP_PROC_PARSER_LOG
-            cout << "// HTTP reqs handler queue is not empty.\n";
-#endif /* HTTP_PROC_PARSER_LOG */
+#if HTTP_HANDLER_LOG
+            ConsoleLog("HTTP handler reqs queue is not empty.");
+#endif /* HTTP_HANDLER_LOG */
             std::string httpReq;
             httpReq = pullHttpHandlerReqsQueue();
             errCode = procHttpRequest(httpReq);
         }
         else if (!jsonParser->jsonRespsQueueEmpty()) {
-#if HTTP_PROC_PARSER_LOG
-            cout << "// Got answer from JSON parser: ";
-#endif /* HTTP_PROC_PARSER_LOG */
+#if HTTP_HANDLER_LOG
+            ConsoleLog("JSON parser responses queue is not empty.");
+#endif /* HTTP_HANDLER_LOG */
             jsonResp = jsonParser->pullJsonRespsQueue();
-#if HTTP_PROC_PARSER_LOG
-            cout << "\"" << jsonResp << "\"" << endl <<
-                "// Need to send the answer from JSON parser "
-                "to HTTP handler queue.\n";
-#endif /* HTTP_PROC_PARSER_LOG */
+#if HTTP_HANDLER_LOG
+            ConsoleLog("Need to send the answer " + string("\"") + 
+                jsonResp + string("\" ") + "from JSON parser "
+                "to HTTP handler queue.");
+#endif /* HTTP_HANDLER_LOG */
             pushHttpHandlerRespsQueue(jsonResp);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
@@ -122,6 +133,10 @@ void HHttpHandler::handle() {
  * @brief Process HTTP request 
  */
 err_type_hh HHttpHandler::procHttpRequest(string httpReq) {
+#if HTTP_HANDLER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* HTTP_HANDLER_CALLED_FUNCTION */
+
     /* unit tests error type */
     err_type_hh errCode = err_type_hh::ERR_OK;
 
@@ -168,6 +183,9 @@ bool HHttpHandler::httpHandlerRespsQueueEmpty(void) {
  * @brief Put response in data process class queue
  */
 void HHttpHandler::pushHttpHandlerRespsQueue(std::string sHttpResponse) {
+#if HTTP_HANDLER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* HTTP_HANDLER_CALLED_FUNCTION */
     httpHandlerRespsQueue.push(sHttpResponse);
 }
 
@@ -175,6 +193,9 @@ void HHttpHandler::pushHttpHandlerRespsQueue(std::string sHttpResponse) {
  * @brief Get first response from data process class queue
  */
 std::string HHttpHandler::pullHttpHandlerRespsQueue(void) {
+#if HTTP_HANDLER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* HTTP_HANDLER_CALLED_FUNCTION */
     std::string httpResp = "";
     httpResp = httpHandlerRespsQueue.front();
     httpHandlerRespsQueue.pop();
@@ -185,6 +206,9 @@ std::string HHttpHandler::pullHttpHandlerRespsQueue(void) {
  * @brief Put new request in data process class queue
  */
 void HHttpHandler::pushHttpHandlerReqsQueue(std::string sHttpRequest) {
+#if HTTP_HANDLER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* HTTP_HANDLER_CALLED_FUNCTION */
     httpHandlerReqsQueue.push(sHttpRequest);
 }
 
@@ -192,6 +216,9 @@ void HHttpHandler::pushHttpHandlerReqsQueue(std::string sHttpRequest) {
  * @brief Get first request from data process class queue
  */
 std::string HHttpHandler::pullHttpHandlerReqsQueue(void) {
+#if HTTP_HANDLER_CALLED_FUNCTION
+    ConsoleFunctionNameLog(__FUNCTION__);
+#endif /* HTTP_HANDLER_CALLED_FUNCTION */
     std::string httpReq = "";
     httpReq = httpHandlerReqsQueue.front();
     httpHandlerReqsQueue.pop();

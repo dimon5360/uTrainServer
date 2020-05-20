@@ -10,10 +10,10 @@
 
 using namespace std;
 
-// v.0.0.15 Build from 18.05.2020
+// v.0.0.16 Build from 20.05.2020
 #define MAJOR  0
 #define MINOR  0
-#define BUILD  15
+#define BUILD  16
 
 /* private prototypes */
 static void PrintInfoApp(void);
@@ -39,6 +39,8 @@ std::shared_ptr<UUnitTests> unitTests;
  */
 int main() {
 
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    /* print application information */
     PrintInfoApp();
 
 #if UNIT_TESTS_ENABLE
@@ -62,6 +64,7 @@ int main() {
     t4.join();
 #endif /* UNIT_TESTS_ENABLE */
 
+    CONSOLE_RESET();
     return 0;
 }
 
@@ -110,13 +113,15 @@ static void jsonProcessInit(void) {
  * @brief print application information 
  */
 static void PrintInfoApp(void) {
-    cout << "Hello %username% " << endl;
-    cout << "Application version v." <<  boost::format("%u.%u.%u") % 
-        MAJOR % MINOR % BUILD << endl;
+    CONSOLE_WHITE();
+    cout << "Hello %username%" << endl;
+    cout << "Application version v." <<
+            boost::format("%u.%u.%u\n") % MAJOR % MINOR % BUILD <<
+            "Compilation time: " <<
+            boost::format("%s %s") %
+            __DATE__ % __TIME__  << endl;
 
-    cout << "Compilation time: " << boost::format("%s %s\n") %
-        __DATE__ % __TIME__ << endl;
-    cout << "Application started.";
-    cout << "==================================\n" << endl;
-
+    cout << "Application started." << endl;
+    cout << "===============================================\n\n";
+    CONSOLE_RESET();
 }

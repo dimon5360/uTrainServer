@@ -1,7 +1,7 @@
-﻿  main.cpp
+﻿  UUnitTests.cpp
   Создание кода
-  7 of 2582 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+  10 of 2640 functions ( 0.4%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    7 functions had inline decision re-evaluated but remain unchanged
+    26 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
   TestProject.vcxproj -> C:\Users\User\source\repos\TestProject\x64\Release\TestProject.exe

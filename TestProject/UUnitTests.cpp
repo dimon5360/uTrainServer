@@ -20,13 +20,12 @@
 /* Initialize unit tests */
 static err_type_ut UnitTestsInit(void);
 
-#if UNIT_TEST_DATA_PROCESSOR
-/* Test of handler HTTP request */
+/* Test of HTTP request handler */
 static err_type_ut HttpDataProcHandlerTest(void);
-#endif /* UNIT_TEST_DATA_PROCESSOR */
-
-/* Test of handler data base request */
-static err_type_ut HttpReqParse(void);
+/* Test of data base request handler */
+static err_type_ut HttpReqParseTest(void);
+/* Test of TCP server connection handler */
+static err_type_ut GetHttpReqAndTransferToHandlerTest(void);
 
 /* User code --------------------------------------------------------------- */
 /***
@@ -34,15 +33,14 @@ static err_type_ut HttpReqParse(void);
  */
 UUnitTests::UUnitTests(void) {
     err_type_ut err = err_type_ut::ERR_OK;
+    stringstream unitTestsResult;
+
     err = UnitTestsInit();
     if (err != err_type_ut::ERR_OK) {
-        std::cout << "Unit tests failed. Error code: " << 
-            boost::format("%u") % (uint32_t)err << endl;
+        unitTestsResult << "Unit tests failed. Error code: " <<
+            boost::format("%u") % (uint32_t)err;
+        ConsoleError(unitTestsResult.str());
         UintTestsResult = false;
-    }
-    else {
-        std::cout << "Unit tests succeed. Error code: " <<
-            boost::format("%u") % (uint32_t)err << endl;
     }
 }
 
@@ -65,25 +63,24 @@ static err_type_ut UnitTestsInit(void) {
     if (err != err_type_ut::ERR_OK) {
         return err;
     }
-
-#if UNIT_TESTS_LOG
-
-#endif /* UNIT_TESTS_LOG */
-
 #endif /* UNIT_TEST_DATA_PROCESSOR */
 
 #if UNIT_TEST_HTTP_HANDLER
 #if UNIT_TESTS_LOG
 #endif /* UNIT_TESTS_LOG */
-    err = HttpReqParse();
+    err = HttpReqParseTest();
     if (err != err_type_ut::ERR_OK) {
         return err;
     }
 #endif /* UNIT_TEST_HTTP_HANDLER */
 
-#if UNIT_TESTS_LOG
-    cout << "Unit test succeed\n";
-#endif /* UNIT_TESTS_LOG */
+#if UNIT_TEST_SERVER_DATA_PROC
+    /* Test TCP server connection handler */
+    err = GetHttpReqAndTransferToHandlerTest();
+    if (err != err_type_ut::ERR_OK) {
+        return err;
+    }
+#endif /* UNIT_TEST_SERVER_DATA_PROC */
 
     return err_type_ut::ERR_OK;
 }
@@ -91,7 +88,7 @@ static err_type_ut UnitTestsInit(void) {
 /* Data processor unit tests =============================================== */
 #if UNIT_TEST_DATA_PROCESSOR
 /***
- * @brief Test of handler data base request
+ * @brief Test of data base request handler
  */
 static err_type_ut HttpDataProcHandlerTest(void) {
     /* unit tests error type */
@@ -130,9 +127,9 @@ static err_type_ut HttpDataProcHandlerTest(void) {
 #if UNIT_TEST_HTTP_HANDLER
 
 /***
- * @brief Test of handler data base request
+ * @brief Test of data base request handler
  */
-static err_type_ut HttpReqParse(void) {
+static err_type_ut HttpReqParseTest(void) {
     /* unit tests error type */
     err_type_hh errCode;
     /* process database requests */
@@ -156,5 +153,34 @@ static err_type_ut HttpReqParse(void) {
     return err_type_ut::ERR_OK;
 }
 #endif /* UNIT_TEST_HTTP_HANDLER */
+
+/* TCP server unit tests =================================================== */
+#if UNIT_TEST_SERVER_DATA_PROC
+
+/***
+ * @brief Test of TCP server connection handler
+ */
+static err_type_ut GetHttpReqAndTransferToHandlerTest (void) {
+    /* unit tests error type */
+    //err_type_hh errCode;
+    /* process database requests */
+    shared_ptr<SServer> tcpServer =
+        make_shared<SServer>("127.0.0.1", 40400);
+
+    /* process database requests */
+    /*shared_ptr<DDataProcess> dataProcessor =
+        make_shared<DDataProcess>();*/
+
+    /*while (1) {
+        if (!dataProcessor->dataProcRespsQueueEmpty()) {
+            cout << "\nData processor response: " << "\"" <<
+                dataProcessor->pullDataProcRespsQueue() << "\"" << endl;
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
+    }*/
+    return err_type_ut::ERR_OK;
+}
+#endif /* UNIT_TEST_SERVER_DATA_PROC */
 
 #endif /* UNIT_TESTS_ENABLE */
