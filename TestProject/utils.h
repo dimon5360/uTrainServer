@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <iostream>
 
+#include <boost/format.hpp> // boost library
+
 extern HANDLE hConsole;
 
 /* Console settings */

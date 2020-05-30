@@ -1,6 +1,7 @@
 ﻿/* main classes headers */
 #include "main.h"
 
+//#include "SServer.h"
 /* internal libs */
 #include <iostream>
 #include <memory>
@@ -10,10 +11,10 @@
 
 using namespace std;
 
-// v.0.0.17 Build from 20.05.2020
+// v.0.0.18 Build from 30.05.2020
 #define MAJOR  0
 #define MINOR  0
-#define BUILD  17
+#define BUILD  18
 
 /* private prototypes */
 static void PrintInfoApp(void);
@@ -26,7 +27,7 @@ static void dataProcessInit(void);
 /* Handle for JSON process thread */
 static void jsonProcessInit(void);
 
-std::shared_ptr<SServer> server;
+//std::shared_ptr<SServer> server;
 std::shared_ptr<DDataBase> db;
 std::shared_ptr<DDataProcess> dataProcessor;
 std::shared_ptr<JJsonParser> jsonProcessor;
@@ -39,7 +40,8 @@ std::shared_ptr<UUnitTests> unitTests;
  */
 int main() {
 
-    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    //hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
     /* print application information */
     PrintInfoApp();
 
@@ -64,7 +66,7 @@ int main() {
     t4.join();
 #endif /* UNIT_TESTS_ENABLE */
 
-    CONSOLE_RESET();
+    //CONSOLE_RESET();
     return 0;
 }
 
@@ -73,7 +75,7 @@ int main() {
  */
 static void serverInit(void) {
     /* create multythread TCP server */
-   server = make_shared<SServer>("192.168.1.64", 4059);
+   //server = make_shared<SServer>("192.168.1.64", 4059);
 }
 
 /**
@@ -113,7 +115,7 @@ static void jsonProcessInit(void) {
  * @brief print application information 
  */
 static void PrintInfoApp(void) {
-    CONSOLE_WHITE();
+    //CONSOLE_WHITE();
     cout << "Hello %username%" << endl;
     cout << "Application version v." <<
             boost::format("%u.%u.%u\n") % MAJOR % MINOR % BUILD <<
@@ -123,5 +125,5 @@ static void PrintInfoApp(void) {
 
     cout << "Application started." << endl;
     cout << "===============================================\n\n";
-    CONSOLE_RESET();
+    //CONSOLE_RESET();
 }

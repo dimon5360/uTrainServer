@@ -5,20 +5,20 @@
  *  @date 08.04.2020
  *  @author Kalmykov Dmitry
  *
- *  @modified 08.04.2020
- *  @version 0.1
+ *  @modified 20.05.2020
+ *  @version 0.2
  */
 
- /* main classes headers */
-#include "main.h"
+ /* server classe header */
+#include "SServer.h"
+/* for formatted output */
+#include "utils.h"
+
+#include <functional>
 
 std::thread t[THREADS_MAX_NUMBER];
 uint32_t countThread = 0;
 std::thread tcpServerMainThread;
-
-#if USE_BOOST 
-#include <boost/format.hpp> // boost library
-#endif /* USE_BOOST */
 
 /**
  * @brief server class constructor
@@ -35,16 +35,15 @@ SServer::SServer(std::string s_ip, uint16_t s_port) {
     this->port = s_port;
     /* init tcp ip port */
     this->ip = s_ip;
+       
+    /* process database requests */
+    dataProcessor = make_shared<DDataProcess>();
 
     err_type_server err = SServerInit();
     if (err != err_type_server::ERR_OK) {
         ConsoleError("Initialization of TCP server failed.");
         return;
     }
-       
-    /* single thread for HTTP handler */
-    tcpServerMainThread = std::thread(&SServer::handle, this);
-    tcpServerMainThread.detach();
 }
 
 /**
@@ -74,37 +73,19 @@ err_type_server SServer::SServerInit(void) {
     ConsoleFunctionNameLog(__FUNCTION__);
 #endif /* TCP_SERVER_CALLED_FUNCTION */
 
-#if USE_BOOST 
+    io_service service;
 
+    ip::tcp::endpoint ep(ip::address::from_string("0.0.0.0"), 40400);
 
-#else 
-    /* init winsock dll */
-    if (WSAStartup(MAKEWORD(2, 2), &wData) != 0) {
-        return err_type_server::ERR_INIT_WSA;
+    ip::tcp::acceptor acc(service, ep);
+
+    while (true) {
+        socket_ptr sock(new ip::tcp::socket(service));
+        acc.accept(*sock);
+        boost::thread(boost::bind(&SServer::handle, this, sock));
+        std::cout << "New client accepted." << std::endl;
+        boost::this_thread::sleep_for(boost::chrono::microseconds(100));
     }
-    printf("WSA Startup succes\n");
-
-    /* socket init */
-    if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-        std::cout << "Error socket opening. Socket is " << sock << std::endl;
-        return err_type_server::ERR_INIT_SOCKET;
-    }
-
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(port);
-
-    if (bind(sock, (struct sockaddr*) & addr, // TODO: fix a problem
-        sizeof(addr)) < 0) {
-        std::cout << "Socket did not bind.\n";
-        return err_type_server::ERR_SOCKET_BIND;
-    }
-
-    if (listen(sock, THREADS_MAX_NUMBER) < 0) {
-        std::cout << "Socket did not listen.\n";
-        return err_type_server::ERR_SOCKET_LISTEN;
-    }
-#endif /* USE_BOOST */
     return err_type_server::ERR_OK;
 }
 
@@ -112,107 +93,23 @@ err_type_server SServer::SServerInit(void) {
 /**
  * @brief server socket handler 
  */
-void SServer::handle() {
+void SServer::handle(socket_ptr sock) {
 #if TCP_SERVER_CALLED_FUNCTION
     ConsoleFunctionNameLog(__FUNCTION__);
 #endif /* TCP_SERVER_CALLED_FUNCTION */
 
-    SOCKET acceptS[THREADS_MAX_NUMBER] = { INVALID_SOCKET }, tempSock;
-    uint32_t sockCount = 0;
-    SOCKADDR_IN addr_c;
-    char buf[1024] = { 0 };
-    while (true)
-    {
-        int addrlen = sizeof(addr_c);
-        if ((tempSock = accept(sock, (struct sockaddr*) &addr_c, &addrlen)) != SOCKET_ERROR
-            && sockCount < THREADS_MAX_NUMBER) {
-            acceptS[sockCount] = tempSock;
-            printf("send\n");
-            printf("sended Client connected from %u.%u.%u.%u:%u\n",
-                (unsigned char)addr_c.sin_addr.S_un.S_un_b.s_b1,
-                (unsigned char)addr_c.sin_addr.S_un.S_un_b.s_b2,
-                (unsigned char)addr_c.sin_addr.S_un.S_un_b.s_b3,
-                (unsigned char)addr_c.sin_addr.S_un.S_un_b.s_b4,
-                ntohs(addr_c.sin_port));
-
-            /* create thread for each tcp client */
-            t[countThread] = std::thread( &SServer::processConnection, this, acceptS[sockCount], addr_c );
-            /* thread exists while server works */
-            t[countThread++].detach();
-            std::cout << "Client #" << sockCount++ << std::endl;
+    char data[512];
+    while (true) {
+        size_t len = sock->read_some(buffer(data));
+        if (len > 0) {
+            printf("Received msg: %s\n", data);
+            dataProcessor->pushDataProcReqsQueue(std::string(data));
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
+
+        /*if (!dataProcessor->dataProcRespsQueueEmpty()) {
+            std::string resp = dataProcessor->pullDataProcRespsQueue();
+            std::cout << "Response: " << resp << std::endl;
+        }*/
+        boost::this_thread::sleep_for(boost::chrono::microseconds(100));
     }
 }
-
-/**
- * @brief create new thread for new client
- */
-void SServer::processConnection(SOCKET s, SOCKADDR_IN addr) {
-#if TCP_SERVER_CALLED_FUNCTION
-    ConsoleFunctionNameLog(__FUNCTION__);
-#endif /* TCP_SERVER_CALLED_FUNCTION */
-
-    char buf[1024] = { 0 };
-    int recvLen = 0;
-    std::cout << std::this_thread::get_id() << std::endl;
-
-    while (true) {
-        if ((recvLen = recv(s, buf, 1024, 0)) > 0) {
-            std::stringstream resp;
-            std::stringstream resp_body;
-
-            /*std::cout << "========================================\n";
-            std::cout << "HTTP request: \n";
-            std::cout << std::string(buf) << std::endl;
-
-            if (strcmp(buf, (char*)"admin") == 0) {
-                resp << "User found.";
-                send(s, resp.str().c_str(), (int)resp.str().length(), 0);
-            }
-            else if (strcmp(buf, (char*)"password") == 0) {
-                resp << "User autorized.";
-                send(s, resp.str().c_str(), (int)resp.str().length(), 0);
-                break;
-            }
-            else {*/
-                /* prepare test html page for new client */
-                std::cout << "========================================\n";
-                std::cout << "HTTP response: \n";
-                resp_body << "<title>Test C++ HTTP Server</title>\n"
-                    << "<h1>Test page</h1>\n"
-                    << "<p>This is body of the test page...</p>\n"
-                    << "<h2>Request headers</h2>\n"
-                    << "<pre>" << buf << "</pre>\n"
-                    << "<em><small>Test C++ Http Server</small></em>\n";
-
-                resp << "HTTP/1.1 200 OK\r\n"
-                    << "Version: HTTP/1.1\r\n"
-                    << "Content-Type: application/json\r\n"
-                    << "Content-Length: " << resp_body.str().length()
-                    << "\r\n\r\n"
-                    << resp_body.str();
-                //resp << "Unknown user.";
-                std::cout << resp.str() << std::endl;
-                send(s, resp.str().c_str(), (int)resp.str().length(), 0);
-            //}
-
-            memset(buf, 0x00, 1024);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-    }
-
-    while (true) {
-        if ((recvLen = recv(s, buf, 1024, 0)) > 0) {
-            std::stringstream resp;
-            std::stringstream resp_body;
-
-            std::cout << std::string(buf) << std::endl;
-
-            send(s, buf, recvLen, 0);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-    }
-}
-

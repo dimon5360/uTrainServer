@@ -10,7 +10,8 @@
  */
 
  /* main classes headers */
-#include "main.h"
+#include "SServer.h"
+#include "LLogger.h"
 
 #if UNIT_TESTS_ENABLE
 #include "stdint.h"
@@ -19,11 +20,12 @@
 /* Unit tests protorypes --------------------------------------------------- */
 /* Initialize unit tests */
 static err_type_ut UnitTestsInit(void);
-
 /* Test of HTTP request handler */
 static err_type_ut HttpDataProcHandlerTest(void);
 /* Test of TCP server connection handler */
-static err_type_ut GetHttpReqAndTransferToHandlerTest(void);
+static err_type_ut TestAsyncTcpServerBasedOnBoost(void);
+/* Test of async logger */
+static err_type_ut CreateAsyncLogger(void);
 
 /* User code --------------------------------------------------------------- */
 /***
@@ -65,11 +67,21 @@ static err_type_ut UnitTestsInit(void) {
 
 #if UNIT_TEST_SERVER_DATA_PROC
     /* Test TCP server connection handler */
-    err = GetHttpReqAndTransferToHandlerTest();
+    err = TestAsyncTcpServerBasedOnBoost();
     if (err != err_type_ut::ERR_OK) {
         return err;
     }
 #endif /* UNIT_TEST_SERVER_DATA_PROC */
+
+#if UNIT_TEST_LOGEER_CONSTRUCTOR
+    /* Test TCP server connection handler */
+    err = CreateAsyncLogger();
+    if (err != err_type_ut::ERR_OK) {
+        return err;
+    }
+#endif /* UNIT_TEST_LOGEER_CONSTRUCTOR */
+
+
 
     return err_type_ut::ERR_OK;
 }
@@ -118,27 +130,27 @@ static err_type_ut HttpDataProcHandlerTest(void) {
 /***
  * @brief Test of TCP server connection handler
  */
-static err_type_ut GetHttpReqAndTransferToHandlerTest (void) {
+static err_type_ut TestAsyncTcpServerBasedOnBoost (void) {
     /* unit tests error type */
-    //err_type_hh errCode;
+    err_type_ut errCode = err_type_ut::ERR_OK;
     /* process database requests */
     shared_ptr<SServer> tcpServer =
         make_shared<SServer>("127.0.0.1", 40400);
-
-    /* process database requests */
-    /*shared_ptr<DDataProcess> dataProcessor =
-        make_shared<DDataProcess>();*/
-
-    /*while (1) {
-        if (!dataProcessor->dataProcRespsQueueEmpty()) {
-            cout << "\nData processor response: " << "\"" <<
-                dataProcessor->pullDataProcRespsQueue() << "\"" << endl;
-            break;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
-    }*/
-    return err_type_ut::ERR_OK;
+    return errCode;
 }
 #endif /* UNIT_TEST_SERVER_DATA_PROC */
+
+/* Logger unit tests ======================================================= */
+#if UNIT_TEST_LOGEER_CONSTRUCTOR
+/***
+ * @brief Test of async logger
+ */
+[[maybe_unused]] static err_type_ut CreateAsyncLogger(void) {
+    /* unit tests error type */
+    err_type_ut errCode = err_type_ut::ERR_OK;
+    std::shared_ptr<LLogger> logger = std::make_shared<LLogger>();
+    return errCode;
+}
+#endif /* UNIT_TEST_LOGEER_CONSTRUCTOR */
 
 #endif /* UNIT_TESTS_ENABLE */

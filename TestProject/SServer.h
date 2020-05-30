@@ -5,9 +5,12 @@
  *  @date 08.04.2020
  *  @author Kalmykov Dmitry
  *
- *  @modified 08.04.2020
- *  @version 0.1
+ *  @modified 20.05.2020
+ *  @version 0.2
  */
+
+#ifndef SSERVER_H
+#define SSERVER_H
 
 #pragma once
  /* main classes headers */
@@ -15,22 +18,28 @@
 
 /* import for console log */
 #include <iostream>
-/* import for multythreading */
-#include <thread>
-#include <memory>
-#include <chrono>
 #include <sstream>
+#include <memory>
 
 #define USE_BOOST 1
 
 /* tcp stack */
 #if USE_BOOST
-#include <boost/asio.hpp>
+#include <boost/format.hpp> // boost library
+/* import for multythreading */
 #include <boost/thread.hpp>
+#include <boost/chrono.hpp>
+
+using namespace boost::asio;
+typedef boost::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
 
 #else
 #include "winsock.h"
 #pragma comment(lib, "ws2_32.lib")
+
+/* import for multythreading */
+#include <chrono>
+#include <thread>
 #endif /* !USE_BOOST */
 
 /*  max number of threads */
@@ -59,11 +68,15 @@ private:
     WSAData wData;
     uint16_t port = 0;
     std::string ip = "";
+#if !USE_BOOST
     char buffer[1024];
+#endif /* !USE_BOOST */
+
+    std::shared_ptr<DDataProcess> dataProcessor;
 
     /* private prototypes */
     err_type_server SServerInit(void);
-    void handle(void);
+    void handle(socket_ptr sock);
     void processConnection(SOCKET s, SOCKADDR_IN addr);
 
 public:
@@ -71,3 +84,5 @@ public:
     SServer(std::string s_ip, uint16_t s_port);
     ~SServer();
 };
+
+#endif /* SSERVER_H */

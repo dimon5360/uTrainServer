@@ -12,6 +12,9 @@
  /* main classes headers */
 #include "main.h"
 
+#include <thread>
+#include <iostream>
+
 /* data base handler thread */
 std::thread dataBaseHandlerThread;
 

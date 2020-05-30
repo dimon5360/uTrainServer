@@ -13,7 +13,7 @@
 #include "main.h"
 
 #include <boost/beast/http/parser.hpp> 
-#include <boost_1_72_0_b1_rc2\boost\beast\http\string_body.hpp>
+#include <boost/beast/http/string_body.hpp>
 
 using namespace boost::beast::http;
 namespace http = boost::beast::http;
@@ -72,6 +72,7 @@ static void PrintMethodInfo(request<string_body> parseResult) {
         return;
     }
 
+    return;
 #if HTTP_PROC_PARSER_LOG
     /* this is not a log, need to realize parser for these data */
     std::cout << "HTTP method : " << parseResult.method() << std::endl;
@@ -107,7 +108,7 @@ void HHttpHandler::handle() {
         /* if data processor input queue is not empty */
         if (!httpHandlerReqsQueueEmpty()) {
 #if HTTP_HANDLER_LOG
-            ConsoleLog("HTTP handler reqs queue is not empty.");
+            ConsoleInfo("HTTP handler reqs queue is not empty.");
 #endif /* HTTP_HANDLER_LOG */
             std::string httpReq;
             httpReq = pullHttpHandlerReqsQueue();
@@ -115,11 +116,11 @@ void HHttpHandler::handle() {
         }
         else if (!jsonParser->jsonRespsQueueEmpty()) {
 #if HTTP_HANDLER_LOG
-            ConsoleLog("JSON parser responses queue is not empty.");
+            ConsoleInfo("JSON parser responses queue is not empty.");
 #endif /* HTTP_HANDLER_LOG */
             jsonResp = jsonParser->pullJsonRespsQueue();
 #if HTTP_HANDLER_LOG
-            ConsoleLog("Need to send the answer " + string("\"") + 
+            ConsoleInfo("Need to send the answer " + string("\"") +
                 jsonResp + string("\" ") + "from JSON parser "
                 "to HTTP handler queue.");
 #endif /* HTTP_HANDLER_LOG */
@@ -150,8 +151,8 @@ err_type_hh HHttpHandler::procHttpRequest(string httpReq) {
     
     request<string_body> parseResult = parser.get();
 #if HTTP_PROC_PARSER_LOG
-    std::cout << "HTTP request method: \n" << parseResult.method() << std::endl;
-    std::cout << "HTTP request body: \n" << parseResult.body() << std::endl;
+    //std::cout << "HTTP request method: \n" << parseResult.method() << std::endl;
+    //std::cout << "HTTP request body: \n" << parseResult.body() << std::endl;
 #endif /* HTTP_PROC_PARSER_LOG */
 
     /* Print information about input HTTP request */
@@ -160,7 +161,7 @@ err_type_hh HHttpHandler::procHttpRequest(string httpReq) {
 #if HTTP_PROC_PARSER_LOG
     cout << "// Resend to JSON parser.\n";
 #endif /* HTTP_PROC_PARSER_LOG */
-    jsonParser->pushJsonReqsQueue(parseResult.body());
+    //jsonParser->pushJsonReqsQueue(parseResult.body());
 
     return errCode;
 }

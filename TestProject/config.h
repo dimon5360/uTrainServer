@@ -18,7 +18,8 @@
 #if UNIT_TESTS_ENABLE
 /* unit tests for class DDataProcessor */
 #define UNIT_TEST_DATA_PROCESSOR        0
-#define UNIT_TEST_SERVER_DATA_PROC      1
+#define UNIT_TEST_SERVER_DATA_PROC      0
+#define UNIT_TEST_LOGEER_CONSTRUCTOR    1
 
 
 #endif /* UNIT_TESTS_ENABLE */
@@ -26,7 +27,6 @@
 
 /* logger items ------------------------------------------------------------ */
 #define TCP_SERVER_CALLED_FUNCTION      1
-
 
 /* log JSON processor (push, pull requests) */
 #define JSON_PROC_PUSH_PULL_LOG         0
@@ -40,7 +40,7 @@
 /* log data processor */
 #define DATA_PROC_CONSTR_DESTR_LOG      0
 #define DATA_PROC_CALLED_FUNCTION       0
-#define DATA_PROC_HANDLER_LOG           0
+#define DATA_PROC_HANDLER_LOG           1
 
 /* log data base */
 #define DATA_BASE_CONSTR_DESTR_LOG      0
@@ -49,6 +49,9 @@
 
 /* log http handler */
 #define HTTP_PROC_CONSTR_DESTR_LOG      0
-#define HTTP_PROC_PARSER_LOG            0
-#define HTTP_HANDLER_LOG                0
+#define HTTP_PROC_PARSER_LOG            1
+#define HTTP_HANDLER_LOG                1
 #define HTTP_HANDLER_CALLED_FUNCTION    0
+
+/* logger class */
+#define LOGGER_ENABLE                   1

@@ -33,7 +33,7 @@ DDataProcess::DDataProcess(void) {
     /* connect to user databse */
     errCode = dataBaseProcessor->DDataBaseConnect("localhost", "adM1n34#184");
     if (errCode != err_type_db::ERR_OK) {
-        ConsoleError("Database connection has been failed.");
+        //ConsoleError("Database connection has been failed.");
         return;
     }
 

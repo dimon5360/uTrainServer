@@ -11,8 +11,16 @@
  /* presprocessor configuration */
 #include "config.h"
 
+#ifndef BOOST_ASIO_HPP
+#include <boost/asio.hpp>
+#endif /* BOOST_ASIO_HPP */
+
+
 /* user classes */
-#include "SServer.h"
+#include "SService.h"
+
+#include "LLogger.h"
+
 #include "DDataBase.h"
 #include "DDataProcess.h"
 
@@ -22,5 +30,7 @@
 
 /* for formatted output */
 #include "utils.h"
+
+extern void StartTcpServer(std::string s_ip, uint16_t s_port);
 
 #define THREAD_TIMEOUT 100 // ms

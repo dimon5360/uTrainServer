@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Boost\boost_1_72_0;C:\Program Files\MySQL\MySQL Server 8.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\MySQL\MySQL Server 8.0\include;C:\Program Files\Boost\boost_1_72_0\boost_1_72_0_b1_rc2;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\Boost\boost_1_72_0\boost_1_72_0_b1_rc2\lib64-msvc-14.2;C:\Program Files\Boost\boost_1_72_0\boost_1_72_0_b1_rc2\libs;C:\Program Files\MySQL\MySQL Server 8.0\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,7 +83,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Boost\boost_1_72_0;C:\Program Files\MySQL\MySQL Server 8.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\MySQL\MySQL Server 8.0\include;C:\Program Files\Boost\boost_1_72_0\boost_1_72_0_b1_rc2;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\Boost\boost_1_72_0\boost_1_72_0_b1_rc2\lib64-msvc-14.2;C:\Program Files\Boost\boost_1_72_0\boost_1_72_0_b1_rc2\libs;C:\Program Files\MySQL\MySQL Server 8.0\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -113,6 +113,7 @@
       <AdditionalIncludeDirectories>C:\Program Files\Boost\boost_1_72_0\boost_1_72_0_b1_rc2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -154,6 +155,7 @@
       <AdditionalIncludeDirectories>C:\Program Files\Boost\boost_1_72_0\boost_1_72_0_b1_rc2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -170,8 +172,10 @@
     <ClCompile Include="DDataBase.cpp" />
     <ClCompile Include="HHttpHandler.cpp" />
     <ClCompile Include="JJsonParser.cpp" />
+    <ClCompile Include="LLogger.cpp" />
     <ClCompile Include="SServer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SService.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="UUnitTests.cpp" />
   </ItemGroup>
@@ -182,9 +186,11 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="HHttpHandler.h" />
     <ClInclude Include="JJsonParser.h" />
+    <ClInclude Include="LLogger.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SServer.h" />
+    <ClInclude Include="SService.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="UUnitTests.h" />
   </ItemGroup>
