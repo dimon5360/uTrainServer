@@ -1,6 +1,5 @@
 #include "utils.h"
 
-HANDLE hConsole;
 
 /***
  * @brief Log string in console with white color
@@ -8,9 +7,7 @@ HANDLE hConsole;
  * @param s_log String of log which must be written in console
  */
 void ConsoleComment(std::string s_log) {
-    CONSOLE_WHITE();
     std::cout << std::endl << "/* " << s_log << " */" << std::endl;
-    CONSOLE_RESET();
 }
 
 /***
@@ -19,9 +16,7 @@ void ConsoleComment(std::string s_log) {
  * @param s_log String of log which must be written in console
  */
 void ConsoleInfo(std::string s_log) {
-    CONSOLE_WHITE();
     std::cout << s_log << std::endl;
-    CONSOLE_RESET();
 }
 
 /***
@@ -30,9 +25,7 @@ void ConsoleInfo(std::string s_log) {
  * @param s_log String of log which must be written in console
  */
 void ConsoleError(std::string s_log) {
-    CONSOLE_RED();
     std::cout << s_log << std::endl;
-    CONSOLE_RESET();
 }
 
 /***
@@ -41,7 +34,5 @@ void ConsoleError(std::string s_log) {
  * @param s_log Name of called function
  */
 void ConsoleFunctionNameLog(std::string s_log) {
-    CONSOLE_WHITE();
     std::cout << std::endl << s_log << "()" << std::endl;
-    CONSOLE_RESET();
 }

@@ -29,31 +29,26 @@ DDataProcess::DDataProcess(void) {
     err_type_db errCode = err_type_db::ERR_OK;
 
     /* initialize data base handler ======================================== */
-    dataBaseProcessor = make_shared<DDataBase>("testdb", 3306);
+    //dataBaseProcessor = std::make_shared<DDataBase>("testdb", 3306);
     /* connect to user databse */
-    errCode = dataBaseProcessor->DDataBaseConnect("localhost", "adM1n34#184");
+    /*errCode = dataBaseProcessor->DDataBaseConnect("localhost", "adM1n34#184");
     if (errCode != err_type_db::ERR_OK) {
         ConsoleError("Database connection has been failed.");
         return;
-    }
+    }*/
 
     /* initialize HTTP handler  ============================================ */
-    httpHandler = make_shared<HHttpHandler>();
+    httpHandler = std::make_unique<HHttpHandler>();
 
     /* single thread for data base handler ================================= */
-    dataProcHandlerThread = std::thread(&DDataProcess::handle, this);
-    dataProcHandlerThread.detach();
-
+    std::thread(&DDataProcess::handle, this).detach();
+    //handle();
 }
 
 /**
  * @brief Data processor destructor
  */
 DDataProcess::~DDataProcess() {
-#if DATA_PROC_CONSTR_DESTR_LOG
-    ConsoleInfo("Data processor class object removed.");
-#endif /* DATA_PROC_CONSTR_DESTR_LOG */
-    dataProcHandlerThread.~thread();
 }
 
 /**
@@ -80,7 +75,7 @@ void DDataProcess::handle() {
             ConsoleComment("DataProcess queue is not empty.");
 #endif /* DATA_PROC_HANDLER_LOG */
             httpHandlerReq = pullDataProcReqsQueue();
-            httpHandler->pushHttpHandlerReqsQueue(httpHandlerReq);
+            httpHandler->pushHttpHandlerReqsQueue(std::move(httpHandlerReq));
         }
         /* if json parser output queue is not empty */
         else if (!httpHandler->httpHandlerRespsQueueEmpty()) {
@@ -93,7 +88,7 @@ void DDataProcess::handle() {
                 httpHandlerResp + string("\" ") + "from HTTP handler queue"
                 "to DataProcess responses queue.");
 #endif /* DATA_PROC_HANDLER_LOG */
-            pushDataProcRespsQueue(httpHandlerResp);
+            pushDataProcRespsQueue(std::move(httpHandlerResp));
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
     }
@@ -116,34 +111,58 @@ bool DDataProcess::dataProcRespsQueueEmpty(void) {
 /***
  * @brief Put response in data process class queue 
  */
-void DDataProcess::pushDataProcRespsQueue(std::string sDataProcResponse) {
-    dataProcRespsQueue.push(sDataProcResponse);
+void DDataProcess::pushDataProcRespsQueue(std::string&& sDataProcResponse) {
+    try {
+        const std::lock_guard<std::mutex> lock(mutex_);
+        dataProcRespsQueue.push(sDataProcResponse);
+    }
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+    }
 }
 
 /***
  * @brief Get first response from data process class queue
  */
-std::string DDataProcess::pullDataProcRespsQueue(void) {
-    std::string dataProcResp = "";
-    dataProcResp = dataProcRespsQueue.front();
-    dataProcRespsQueue.pop();
+const std::string& DDataProcess::pullDataProcRespsQueue(void) {
+    std::string dataProcResp;
+    try {
+        const std::lock_guard<std::mutex> lock(mutex_);
+        dataProcResp = dataProcRespsQueue.front();
+        dataProcRespsQueue.pop();
+    }
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+    }
     return dataProcResp;
 }
 
 /***
  * @brief Put new request in data process class queue
  */
-void DDataProcess::pushDataProcReqsQueue(std::string sDataProcRequest) {
-    dataProcReqsQueue.push(sDataProcRequest);
+void DDataProcess::pushDataProcReqsQueue(std::string&& sDataProcRequest) {
+    try {
+        const std::lock_guard<std::mutex> lock(mutex_);
+        dataProcReqsQueue.push(sDataProcRequest);
+    }
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+    }
 }
 
 /***
  * @brief Get first request from data process class queue
  */
-std::string DDataProcess::pullDataProcReqsQueue(void) {
-    std::string dataProcReq = "";
-    dataProcReq = dataProcReqsQueue.front();
-    dataProcReqsQueue.pop();
+const std::string& DDataProcess::pullDataProcReqsQueue(void)  {
+    std::string dataProcReq;
+    try {
+        const std::lock_guard<std::mutex> lock(mutex_);
+        dataProcReq = dataProcReqsQueue.front();
+        dataProcReqsQueue.pop();
+    }
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+    }
     return dataProcReq;
 }
 

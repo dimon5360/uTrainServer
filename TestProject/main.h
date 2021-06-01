@@ -23,4 +23,4 @@
 /* for formatted output */
 #include "utils.h"
 
-#define THREAD_TIMEOUT 100 // ms
+#define THREAD_TIMEOUT 3 // ms

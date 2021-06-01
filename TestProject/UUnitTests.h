@@ -30,13 +30,13 @@ enum class err_type_ut {
 class UUnitTests
 {
 private:
-    /* Unit tests result */
-    bool UintTestsResult = true;
+
+    /* Unit tests class constructor */
+    UUnitTests() = delete;
 
 public:
-    /* Unit tests class constructor */
-    UUnitTests();
     /* Function returns unit tests result */
-    bool GetUnitTestsResult(void);
+    static bool GetUnitTestsResult(void);
+    static err_type_ut UnitTestsInit(void);
 };
 #endif /* UNIT_TESTS_ENABLE */

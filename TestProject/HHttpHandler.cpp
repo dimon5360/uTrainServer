@@ -13,10 +13,7 @@
 #include "main.h"
 
 #include <boost/beast/http/parser.hpp> 
-#include <boost_1_72_0_b1_rc2\boost\beast\http\string_body.hpp>
-
-using namespace boost::beast::http;
-namespace http = boost::beast::http;
+#include <boost/beast/http/string_body.hpp>
 
 /* data processor handler thread */
 std::thread httpHandlerThread;
@@ -25,45 +22,37 @@ std::thread httpHandlerThread;
  * @brief HTTP data hadnler class constructor
  */
 HHttpHandler::HHttpHandler() {
-#if HTTP_PROC_CONSTR_DESTR_LOG
-    ConsoleInfo("HTTP handler class object created.");
-#endif /* HTTP_PROC_CONSTR_DESTR_LOG */
 
     /* initialize JSON parser handler  ===================================== */
-    jsonParser = make_shared<JJsonParser>();
+    jsonParser = std::make_unique<JJsonParser>();
     
     /* single thread for HTTP handler */
-    httpHandlerThread = std::thread(&HHttpHandler::handle, this);
-    httpHandlerThread.detach();
+    /*httpHandlerThread = std::thread(&HHttpHandler::handle, this);
+    httpHandlerThread.join();*/
+    std::thread(&HHttpHandler::handle, this).detach();
+    //handle();
 }
 
 /**
  * @brief HTTP data hadnler class destructor
  */
 HHttpHandler::~HHttpHandler() {
-#if HTTP_PROC_CONSTR_DESTR_LOG
-    ConsoleInfo("HTTP handler class object removed.");
-#endif /* HTTP_PROC_CONSTR_DESTR_LOG */
-    httpHandlerThread.~thread();
 }
 
 
 /***
  * @brief Print info about input HTTP request
  */
-static void PrintMethodInfo(request<string_body> parseResult) {
-#if HTTP_HANDLER_CALLED_FUNCTION
-    ConsoleFunctionNameLog(__FUNCTION__);
-#endif /* HTTP_HANDLER_CALLED_FUNCTION */
+static void PrintMethodInfo(boost::beast::http::request<boost::beast::http::string_body> parseResult) {
 
     switch (parseResult.method()) {
 
-    case http::verb::get:
+    case boost::beast::http::verb::get:
 #if HTTP_PROC_PARSER_LOG
         cout << "================== GET ==================\n";
 #endif /* HTTP_PROC_PARSER_LOG */
         break;
-    case http::verb::post:
+    case boost::beast::http::verb::post:
 #if HTTP_PROC_PARSER_LOG
         cout << "================== POST ==================\n";
 #endif /* HTTP_PROC_PARSER_LOG */
@@ -92,9 +81,6 @@ static void PrintMethodInfo(request<string_body> parseResult) {
  *
  */
 void HHttpHandler::handle() {
-#if HTTP_HANDLER_CALLED_FUNCTION
-    ConsoleFunctionNameLog(__FUNCTION__);
-#endif /* HTTP_HANDLER_CALLED_FUNCTION */
 
     std::string jsonResp, jsonReq;
     err_type_hh errCode = err_type_hh::ERR_OK;
@@ -103,64 +89,79 @@ void HHttpHandler::handle() {
     ConsoleInfo("HTTP handler thread started.");
 #endif /* HTTP_HANDLER_LOG */
 
-    while (1) {
-        /* if data processor input queue is not empty */
-        if (!httpHandlerReqsQueueEmpty()) {
+    try {
+        while (1) {
+            /* if data processor input queue is not empty */
+            if (!httpHandlerReqsQueueEmpty()) {
 #if HTTP_HANDLER_LOG
-            ConsoleLog("HTTP handler reqs queue is not empty.");
+                ConsoleLog("HTTP handler reqs queue is not empty.");
 #endif /* HTTP_HANDLER_LOG */
-            std::string httpReq;
-            httpReq = pullHttpHandlerReqsQueue();
-            errCode = procHttpRequest(httpReq);
+                std::string httpReq;
+                httpReq = pullHttpHandlerReqsQueue();
+                errCode = procHttpRequest(std::move(httpReq));
+            }
+            else if (!jsonParser->jsonRespsQueueEmpty()) {
+#if HTTP_HANDLER_LOG
+                ConsoleLog("JSON parser responses queue is not empty.");
+#endif /* HTTP_HANDLER_LOG */
+                jsonResp = jsonParser->pullJsonRespsQueue();
+#if HTTP_HANDLER_LOG
+                ConsoleLog("Need to send the answer " + string("\"") +
+                    jsonResp + string("\" ") + "from JSON parser "
+                    "to HTTP handler queue.");
+#endif /* HTTP_HANDLER_LOG */
+                pushHttpHandlerRespsQueue(std::move(jsonResp));
+                break;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
         }
-        else if (!jsonParser->jsonRespsQueueEmpty()) {
-#if HTTP_HANDLER_LOG
-            ConsoleLog("JSON parser responses queue is not empty.");
-#endif /* HTTP_HANDLER_LOG */
-            jsonResp = jsonParser->pullJsonRespsQueue();
-#if HTTP_HANDLER_LOG
-            ConsoleLog("Need to send the answer " + string("\"") + 
-                jsonResp + string("\" ") + "from JSON parser "
-                "to HTTP handler queue.");
-#endif /* HTTP_HANDLER_LOG */
-            pushHttpHandlerRespsQueue(jsonResp);
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
+    }
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
     }
 }
+
 
 /***
  * @brief Process HTTP request 
  */
-err_type_hh HHttpHandler::procHttpRequest(string httpReq) {
-#if HTTP_HANDLER_CALLED_FUNCTION
-    ConsoleFunctionNameLog(__FUNCTION__);
-#endif /* HTTP_HANDLER_CALLED_FUNCTION */
+err_type_hh HHttpHandler::procHttpRequest(std::string&& httpReq) {
 
+    namespace http = boost::beast::http;
     /* unit tests error type */
     err_type_hh errCode = err_type_hh::ERR_OK;
 
+    try {
+        boost::beast::error_code ec;
+        http::request_parser<http::string_body> parser;
 
-    boost::beast::error_code ec;
-    request_parser<string_body> parser;
+        parser.eager(true);
 
-    parser.eager(true);
-    
-    parser.put(boost::asio::buffer(httpReq), ec);
-    
-    request<string_body> parseResult = parser.get();
+        parser.put(boost::asio::buffer(std::move(httpReq)), ec);
+        
+        if (ec.value()) {
+            std::cout << ec.message() << std::endl;
+            return err_type_hh::ERR_HTTP_PARSER_FAILED;
+        }
+
+        http::request<http::string_body> parseResult = parser.get();
 #if HTTP_PROC_PARSER_LOG
-    std::cout << "HTTP request method: \n" << parseResult.method() << std::endl;
-    std::cout << "HTTP request body: \n" << parseResult.body() << std::endl;
+        std::cout << "HTTP request method: \n" << parseResult.method() << std::endl;
+        std::cout << "HTTP request body: \n" << parseResult.body() << std::endl;
 #endif /* HTTP_PROC_PARSER_LOG */
 
-    /* Print information about input HTTP request */
-    PrintMethodInfo(parseResult);
+        /* Print information about input HTTP request */
+        PrintMethodInfo(parseResult);
 
 #if HTTP_PROC_PARSER_LOG
-    cout << "// Resend to JSON parser.\n";
+        cout << "// Resend to JSON parser.\n";
 #endif /* HTTP_PROC_PARSER_LOG */
-    jsonParser->pushJsonReqsQueue(parseResult.body());
+        std::string json_req = parseResult.body();
+        jsonParser->pushJsonReqsQueue(std::move(json_req));
+    }
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+    }
 
     return errCode;
 }
@@ -182,45 +183,58 @@ bool HHttpHandler::httpHandlerRespsQueueEmpty(void) {
 /***
  * @brief Put response in data process class queue
  */
-void HHttpHandler::pushHttpHandlerRespsQueue(std::string sHttpResponse) {
-#if HTTP_HANDLER_CALLED_FUNCTION
-    ConsoleFunctionNameLog(__FUNCTION__);
-#endif /* HTTP_HANDLER_CALLED_FUNCTION */
-    httpHandlerRespsQueue.push(sHttpResponse);
+void HHttpHandler::pushHttpHandlerRespsQueue(std::string&& sHttpResponse) {
+    try {
+        const std::lock_guard<std::mutex> lock(mutex_);
+        httpHandlerRespsQueue.push(sHttpResponse);
+    }
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+    }
 }
 
 /***
  * @brief Get first response from data process class queue
  */
-std::string HHttpHandler::pullHttpHandlerRespsQueue(void) {
-#if HTTP_HANDLER_CALLED_FUNCTION
-    ConsoleFunctionNameLog(__FUNCTION__);
-#endif /* HTTP_HANDLER_CALLED_FUNCTION */
-    std::string httpResp = "";
-    httpResp = httpHandlerRespsQueue.front();
-    httpHandlerRespsQueue.pop();
+const std::string& HHttpHandler::pullHttpHandlerRespsQueue(void) {
+    std::string httpResp;
+    try {
+        const std::lock_guard<std::mutex> lock(mutex_);
+            httpResp = httpHandlerRespsQueue.front();
+            httpHandlerRespsQueue.pop();
+    }
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+    }
     return httpResp;
 }
 
 /***
  * @brief Put new request in data process class queue
  */
-void HHttpHandler::pushHttpHandlerReqsQueue(std::string sHttpRequest) {
-#if HTTP_HANDLER_CALLED_FUNCTION
-    ConsoleFunctionNameLog(__FUNCTION__);
-#endif /* HTTP_HANDLER_CALLED_FUNCTION */
-    httpHandlerReqsQueue.push(sHttpRequest);
+void HHttpHandler::pushHttpHandlerReqsQueue(std::string&& sHttpRequest) {
+    try {
+        const std::lock_guard<std::mutex> lock(mutex_);
+        httpHandlerReqsQueue.push(sHttpRequest);
+    } 
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+    }
 }
 
 /***
  * @brief Get first request from data process class queue
  */
-std::string HHttpHandler::pullHttpHandlerReqsQueue(void) {
-#if HTTP_HANDLER_CALLED_FUNCTION
-    ConsoleFunctionNameLog(__FUNCTION__);
-#endif /* HTTP_HANDLER_CALLED_FUNCTION */
-    std::string httpReq = "";
-    httpReq = httpHandlerReqsQueue.front();
-    httpHandlerReqsQueue.pop();
+const std::string& HHttpHandler::pullHttpHandlerReqsQueue(void) {
+
+    std::string httpReq;
+    try {
+        const std::lock_guard<std::mutex> lock(mutex_);
+        httpReq = httpHandlerReqsQueue.front();
+        httpHandlerReqsQueue.pop();
+    }
+    catch (std::exception& ex) {
+        std::cout << ex.what() << std::endl;
+    }
     return httpReq;
 }

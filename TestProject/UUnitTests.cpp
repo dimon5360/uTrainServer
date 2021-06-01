@@ -17,9 +17,6 @@
 #include <boost/format.hpp> // boost library
 
 /* Unit tests protorypes --------------------------------------------------- */
-/* Initialize unit tests */
-static err_type_ut UnitTestsInit(void);
-
 /* Test of HTTP request handler */
 static err_type_ut HttpDataProcHandlerTest(void);
 /* Test of data base request handler */
@@ -27,23 +24,11 @@ static err_type_ut HttpReqParseTest(void);
 /* Test of TCP server connection handler */
 static err_type_ut GetHttpReqAndTransferToHandlerTest(void);
 
-/* User code --------------------------------------------------------------- */
-/***
- * @brief Unit tests class constructor
- */
-UUnitTests::UUnitTests(void) {
-    err_type_ut err = err_type_ut::ERR_OK;
-    stringstream unitTestsResult;
+/* Unit tests result */
+static bool UintTestsResult;
 
-    err = UnitTestsInit();
-    if (err != err_type_ut::ERR_OK) {
-        unitTestsResult << "Unit tests failed. Error code: " <<
-            boost::format("%u") % (uint32_t)err;
-        ConsoleError(unitTestsResult.str());
-        UintTestsResult = false;
-    }
-}
 
+/* User code --------------------------------------------------------------- /
 /***
  * @brief Function returns unit tests result
  */
@@ -54,7 +39,8 @@ bool UUnitTests::GetUnitTestsResult(void) {
 /***
  * @brief Initialize unit tests
  */
-static err_type_ut UnitTestsInit(void) {
+err_type_ut UUnitTests::UnitTestsInit(void) {
+    UintTestsResult = false;
     err_type_ut err = err_type_ut::ERR_OK;
 
 #if UNIT_TEST_DATA_PROCESSOR
@@ -94,15 +80,24 @@ static err_type_ut HttpDataProcHandlerTest(void) {
     /* unit tests error type */
     err_type_ut errCode = err_type_ut::ERR_OK;
     /* process database requests */
-    shared_ptr<DDataProcess> dataProcessor =
-        make_shared<DDataProcess>();
+    std::shared_ptr<DDataProcess> dataProcessor =
+        std::make_shared<DDataProcess>();
 
-    string jsonReq = "{ \"active\": true, \"username\": \"Dmitry\", \"password\": \"admin\", \"validation-factors\": {\
+    std::string jsonReq = "{\"name\": \"test_name\", \"surname\": \"test_surname\"}\r\n";
+    //std::string jsonReq = "{ \"active\": true, \"username\": \"Dmitry\", \"password\": \"admin\", \"validation-factors\": {\
             \"validationFactor1\" : [ { \"name\" : \"remote_address\", \"value\" : \"127.0.0.1\" } ],\
             \"validationFactor2\" : { \"name\" : \"main_address\", \"value\" : \"192.168.122.1\" } } }";
 
     std::stringstream req;
-    req << "POST /cgi/message.php HTTP/1.1\r\n"
+    /*req << "POST /cgi/message.php HTTP/1.1\r\n"
+        << "Content-Length: " << jsonReq.size() << "\r\n"
+        << "Content-Type: application/json; utf-8\r\n"
+        << "Host: www.utrain.com\r\n"
+        << "Accept: application/json\r\n"
+        << "\r\n"
+        << jsonReq;*/
+
+    req << "GET /cgi/message.php HTTP/1.1\r\n"
         << "Content-Length: " << jsonReq.size() << "\r\n"
         << "Content-Type: application/json; utf-8\r\n"
         << "Host: www.utrain.com\r\n"
@@ -110,11 +105,11 @@ static err_type_ut HttpDataProcHandlerTest(void) {
         << "\r\n"
         << jsonReq;
 
-    dataProcessor->pushDataProcReqsQueue(req.str());
+    dataProcessor->pushDataProcReqsQueue(std::move(req.str()));
     while (1) {
         if (!dataProcessor->dataProcRespsQueueEmpty()) {
-            cout << "\nData processor response: " << "\"" <<
-                dataProcessor->pullDataProcRespsQueue() << "\"" <<endl;
+            std::cout << "\nData processor response: " << "\"" <<
+                dataProcessor->pullDataProcRespsQueue() << "\"" << std::endl;
             break;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
@@ -133,9 +128,12 @@ static err_type_ut HttpReqParseTest(void) {
     /* unit tests error type */
     err_type_hh errCode;
     /* process database requests */
-    shared_ptr<HHttpHandler> httpHandler =
-        make_shared<HHttpHandler>();
+    std::unique_ptr<HHttpHandler> httpHandler =
+        std::make_unique<HHttpHandler>();
     std::string jsonReq = "{\"name\": \"test_name\", \"surname\": \"test_surname\"}\r\n";
+    //std::string jsonReq = "{ \"active\": true, \"username\": \"Dmitry\", \"password\": \"admin\", \"validation-factors\": {\
+            \"validationFactor1\" : [ { \"name\" : \"remote_address\", \"value\" : \"127.0.0.1\" } ],\
+            \"validationFactor2\" : { \"name\" : \"main_address\", \"value\" : \"192.168.122.1\" } } }";
 
     std::stringstream req;
     req << "POST /cgi/message.php HTTP/1.1\r\n"
@@ -146,7 +144,15 @@ static err_type_ut HttpReqParseTest(void) {
         << "\r\n"
         << jsonReq;
 
-    errCode = httpHandler->procHttpRequest(req.str());
+    errCode = httpHandler->procHttpRequest(std::move(req.str()));
+    while (1) {
+        if (!httpHandler->httpHandlerRespsQueueEmpty()) {
+            std::cout << "\nData processor response: " << "\"" <<
+                httpHandler->pullHttpHandlerRespsQueue() << "\"" << std::endl;
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_TIMEOUT));
+    }
     if(errCode != err_type_hh::ERR_OK)
         return err_type_ut::ERR_HTTP_HANDLER_PARSER;
 
@@ -164,8 +170,8 @@ static err_type_ut GetHttpReqAndTransferToHandlerTest (void) {
     /* unit tests error type */
     //err_type_hh errCode;
     /* process database requests */
-    shared_ptr<SServer> tcpServer =
-        make_shared<SServer>("127.0.0.1", 40400);
+    std::shared_ptr<SServer> tcpServer =
+        std::make_shared<SServer>("127.0.0.1", 40400);
 
     /* process database requests */
     /*shared_ptr<DDataProcess> dataProcessor =

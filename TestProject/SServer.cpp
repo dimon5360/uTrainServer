@@ -30,8 +30,8 @@ SServer::SServer(std::string s_ip, uint16_t s_port) {
     ConsoleFunctionNameLog(__FUNCTION__);
 #endif /* TCP_SERVER_CALLED_FUNCTION */
 
-    cout << "TCP server IP : " << boost::format("%s:%u") %
-        s_ip % s_port << endl;
+    std::cout << "TCP server IP : " << boost::format("%s:%u") %
+        s_ip % s_port << std::endl;
 
     /* init tcp ip address */
     this->port = s_port;

@@ -16,7 +16,7 @@
 #include "main.h"
 
  /* import mysql prototypes */
-#include <mysql.h>
+//#include <mysql.h>
 #include <xstring>
  /* import data queue */
 #include <queue>
@@ -38,9 +38,9 @@ private:
     std::string dbName;
     uint32_t dbPort;
 
-    MYSQL * conn, mysql;
-    MYSQL_ROW row;
-    MYSQL_RES * res;
+    //MYSQL * conn, mysql;
+    //MYSQL_ROW row;
+    //MYSQL_RES * res;
     uint32_t userCount = 0;
     
     /* Init database connection */

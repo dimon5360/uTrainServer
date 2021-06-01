@@ -5,15 +5,13 @@
 #include <iostream>
 #include <memory>
 /* external libs */
-#include <mysql.h>          // for work with db MYSQL
+//#include <mysql.h>          // for work with db MYSQL
 #include <boost/format.hpp> // boost library
 
-using namespace std;
-
-// v.0.0.16 Build from 20.05.2020
+// v.0.0.17 Build from 01.06.2021
 #define MAJOR  0
 #define MINOR  0
-#define BUILD  16
+#define BUILD  17
 
 /* private prototypes */
 static void PrintInfoApp(void);
@@ -39,15 +37,17 @@ std::shared_ptr<UUnitTests> unitTests;
  */
 int main() {
 
-    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     /* print application information */
     PrintInfoApp();
 
 #if UNIT_TESTS_ENABLE
-    unitTests = make_shared<UUnitTests>();
-    if (!unitTests->GetUnitTestsResult()) {
-        return -1;
-    }
+    std::thread{
+        [&](){ 
+            UUnitTests::UnitTestsInit();
+            if (!unitTests->GetUnitTestsResult()) {
+                return -1;
+            }}
+    }.join();
 #else 
     /* thread for server connect */
     std::thread t1{ serverInit };
@@ -63,8 +63,6 @@ int main() {
     t3.join();
     t4.join();
 #endif /* UNIT_TESTS_ENABLE */
-
-    CONSOLE_RESET();
     return 0;
 }
 
@@ -73,7 +71,7 @@ int main() {
  */
 static void serverInit(void) {
     /* create multythread TCP server */
-   server = make_shared<SServer>("192.168.1.64", 4059);
+   server = std::make_shared<SServer>("192.168.1.64", 4059);
 }
 
 /**
@@ -82,7 +80,7 @@ static void serverInit(void) {
 static void databaseInit(void) {
     err_type_db errCode = err_type_db::ERR_OK;
     /* create database connection */
-    db = make_shared<DDataBase>("testdb", 3306);
+    db = std::make_shared<DDataBase>("testdb", 3306);
     /* connect to user databse */
     errCode = db->DDataBaseConnect("localhost", "adM1n34#184");
     if (errCode != err_type_db::ERR_OK) {
@@ -98,7 +96,7 @@ static void databaseInit(void) {
  */
 static void dataProcessInit(void) {
     /* create thread for data processor */
-    dataProcessor = make_shared<DDataProcess>();
+    dataProcessor = std::make_shared<DDataProcess>();
 }
 
 /**
@@ -106,22 +104,20 @@ static void dataProcessInit(void) {
  */
 static void jsonProcessInit(void) {
     /* create thread for data processor */
-    jsonProcessor = make_shared<JJsonParser>();
+    jsonProcessor = std::make_shared<JJsonParser>();
 }
 
 /** 
  * @brief print application information 
  */
 static void PrintInfoApp(void) {
-    CONSOLE_WHITE();
-    cout << "Hello %username%" << endl;
-    cout << "Application version v." <<
+    std::cout << "Hello %username%" << std::endl;
+    std::cout << "Application version v." <<
             boost::format("%u.%u.%u\n") % MAJOR % MINOR % BUILD <<
             "Compilation time: " <<
             boost::format("%s %s") %
-            __DATE__ % __TIME__  << endl;
+            __DATE__ % __TIME__  << std::endl;
 
-    cout << "Application started." << endl;
-    cout << "===============================================\n\n";
-    CONSOLE_RESET();
+    std::cout << "Application started." << std::endl;
+    std::cout << "===============================================\n\n";
 }

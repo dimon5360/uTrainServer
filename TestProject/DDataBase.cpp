@@ -38,7 +38,7 @@ DDataBase::~DDataBase(void) {
 #if DATA_BASE_CONSTR_DESTR_LOG
     ConsoleInfo("Data base class object removed.");
 #endif /* DATA_BASE_CONSTR_DESTR_LOG */
-    mysql_close(conn);
+    //mysql_close(conn);
     dataBaseHandlerThread.~thread();
 }
 
@@ -46,7 +46,7 @@ DDataBase::~DDataBase(void) {
  * @brief Init database connection 
  */
 void DDataBase::DDataBaseInit(void) {
-    mysql_init(&mysql);
+    //mysql_init(&mysql);
 }
 
 /***
@@ -82,15 +82,15 @@ std::string DDataBase::DDataBasePullRequest(void) {
 err_type_db DDataBase::DDataBaseConnect(std::string hostAddr, std::string pass) {
     
     err_type_db errCode = err_type_db::ERR_OK;
-    conn = mysql_real_connect(&mysql, hostAddr.c_str(), "root",
+    /*econn = mysql_real_connect(&mysql, hostAddr.c_str(), "root",
         pass.c_str(), dbName.c_str(), dbPort, NULL, 0);
     if (!conn) {
         std::cout << mysql_error(&mysql) << std::endl;
         return err_type_db::ERR_DB_CONNECT;
-    }
+    }*/
 
     /* db host information */
-    std::string hostInfo = mysql_get_host_info(&mysql);
+    /*std::string hostInfo = mysql_get_host_info(&mysql);
     if (hostInfo.empty()) {
         std::cout << mysql_error(&mysql) << std::endl;
         return err_type_db::ERR_NOT_GOT_HOST_INFO;
@@ -103,7 +103,7 @@ err_type_db DDataBase::DDataBaseConnect(std::string hostAddr, std::string pass) 
     }
     else {
         return errCode;
-    }
+    }*/
     return errCode;
 }
 
@@ -112,23 +112,23 @@ err_type_db DDataBase::DDataBaseConnect(std::string hostAddr, std::string pass) 
  * @retval Error code
  */
 err_type_db DDataBase::RequestDatabaseUserNumber(void) {
-    int ret = 0;
+    //int ret = 0;
     /* query to db */
-    ret = mysql_query(conn, "select user_count()");
+    /*ret = mysql_query(conn, "select user_count()");
     if (ret != 0) {
         std::cout << "Incorrect request." << std::endl;
         return err_type_db::ERR_INCORRECT_REQUEST;
-    }
+    }*/
     /* store result */
-    res = mysql_store_result(conn);
+    //res = mysql_store_result(conn);
     /* print result */
-    std::cout << "Number of active users : ";
+    /*std::cout << "Number of active users : ";
     while ((row = mysql_fetch_row(res)) != NULL) {
         std::cout << row[0] << std::endl;
     }
-    std::cout << std::endl;
+    std::cout << std::endl;*/
     /* free result */
-    mysql_free_result(res);
+    //mysql_free_result(res);
     return err_type_db::ERR_OK;
 }
 
@@ -140,34 +140,34 @@ err_type_db DDataBase::RequestDatabaseUserNumber(void) {
  */
 err_type_db DDataBase::DDataBaseUserDataReq(std::string req, std::string userName) {
 
-    int ret = 0;
-    /* query to db */
-    std::string query;
-    query = "select " + req + " from users where fname = \"" + userName + "\"";
-    ret = mysql_query(conn, query.c_str());
-    if (ret != 0) {
-        std::cout << "Incorrect request." << std::endl;
-        return err_type_db::ERR_INCORRECT_REQUEST;
-    }
-    /* store result */
-    res = mysql_store_result(conn);
-    /* check that user found */
-    if ((row = mysql_fetch_row(res)) == NULL) {
-        std::cout << "User not found." << std::endl;
-        /* free result */
-        mysql_free_result(res);
-        return err_type_db::ERR_USER_NOT_FOUND;
-    }
-    else {
-        /* print result */
-        std::cout << "User " + req + ": ";
-        std::cout << row[0] << std::endl;
-        while ((row = mysql_fetch_row(res)) != NULL) {
-            std::cout << row[0] << std::endl;
-        }
-    }
-    /* free result */
-    mysql_free_result(res);
+    //int ret = 0;
+    ///* query to db */
+    //std::string query;
+    //query = "select " + req + " from users where fname = \"" + userName + "\"";
+    //ret = mysql_query(conn, query.c_str());
+    //if (ret != 0) {
+    //    std::cout << "Incorrect request." << std::endl;
+    //    return err_type_db::ERR_INCORRECT_REQUEST;
+    //}
+    ///* store result */
+    //res = mysql_store_result(conn);
+    ///* check that user found */
+    //if ((row = mysql_fetch_row(res)) == NULL) {
+    //    std::cout << "User not found." << std::endl;
+    //    /* free result */
+    //    mysql_free_result(res);
+    //    return err_type_db::ERR_USER_NOT_FOUND;
+    //}
+    //else {
+    //    /* print result */
+    //    std::cout << "User " + req + ": ";
+    //    std::cout << row[0] << std::endl;
+    //    while ((row = mysql_fetch_row(res)) != NULL) {
+    //        std::cout << row[0] << std::endl;
+    //    }
+    //}
+    ///* free result */
+    //mysql_free_result(res);
     return err_type_db::ERR_OK;
 }
 

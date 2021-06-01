@@ -16,10 +16,14 @@
 /* import JSON parser class */
 #include "JJsonParser.h"
 
+ /* std C++ lib headers */
+#include <mutex>
+
  /* error codes for HTTP handler class ------------------------------------- */
 enum class err_type_hh {
     ERR_OK = 0,
     ERR_HTTP_METHOD_UNEXPECTED,
+    ERR_HTTP_PARSER_FAILED,
     ERR_ALL_CODES_MOUNT
 };
 
@@ -32,8 +36,9 @@ private:
     /* queue for http responses keeping */
     std::queue<std::string> httpHandlerRespsQueue;
 
-    std::shared_ptr<JJsonParser> jsonParser;
-
+    std::unique_ptr<JJsonParser> jsonParser;
+    /* mutex object to avoid data race */
+    mutable std::mutex mutex_;
 
 public:
     /* constructor */
@@ -42,13 +47,13 @@ public:
     ~HHttpHandler();
 
     /* put response in http handler class queue */
-    void pushHttpHandlerRespsQueue(std::string sDataProcRequest);
+    void pushHttpHandlerRespsQueue(std::string &&sDataProcRequest);
     /* get new response from http handler class queue */
-    std::string pullHttpHandlerRespsQueue(void);
+    const std::string& pullHttpHandlerRespsQueue(void);
     /* put new request in http handler class queue */
-    void pushHttpHandlerReqsQueue(std::string sDataProcRequest);
+    void pushHttpHandlerReqsQueue(std::string &&sDataProcRequest);
     /* get new request from http handler class queue */
-    std::string pullHttpHandlerReqsQueue(void);
+    const std::string& pullHttpHandlerReqsQueue(void);
 
     /* check that requests queue is empty */
     bool httpHandlerReqsQueueEmpty(void);
@@ -56,7 +61,7 @@ public:
     bool httpHandlerRespsQueueEmpty(void);
 
     /* Process HTTP request */
-    err_type_hh procHttpRequest(string httpReq);
+    err_type_hh procHttpRequest(std::string&& httpReq);
 
     void handle();
 };

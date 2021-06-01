@@ -17,7 +17,9 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 
-using namespace std;
+ /* std C++ lib headers */
+#include <mutex>
+
 namespace pt = boost::property_tree;
 
 enum class err_type_jp {
@@ -29,12 +31,15 @@ enum class err_type_jp {
 class JJsonParser
 {
 private:
-    queue<string> jsonParserReqsQueue;
-    queue<string> jsonParserRespsQueue;
+    std::queue<std::string> jsonParserReqsQueue;
+    std::queue<std::string> jsonParserRespsQueue;
     /* Parse JSON string */
-    err_type_jp parseJsonRequest(string jsonDoc, pt::ptree tree, std::string offset);
+    err_type_jp parseJsonRequest(std::string jsonDoc, pt::ptree tree, std::string offset);
     /* Process JSON string */
-    void procJsonRequest(string jsonDoc);
+    void procJsonRequest(std::string&& jsonDoc);
+    
+    /* mutex object to avoid data race */
+    mutable std::mutex mutex_;
        
 public:
     /* Handle ------------------------------------- */
@@ -48,13 +53,12 @@ public:
 
     /* interfaces for json queue ----------------- */
     /* Put JSON data to queue */
-    void pushJsonRespsQueue(string);
+    void pushJsonRespsQueue(std::string&&);
     /* Put JSON data to queue */
-    void pushJsonReqsQueue(string);
+    void pushJsonReqsQueue(std::string&&);
     /* Get JSON data from queue */
-    string pullJsonRespsQueue(void);
-    /* Get JSON data from queue */
-    string pullJsonReqsQueue(void);
+    const std::string& pullJsonRespsQueue(void);
+    const std::string& pullJsonReqsQueue(void);
 
     bool jsonReqsQueueEmpty(void);
     bool jsonRespsQueueEmpty(void);

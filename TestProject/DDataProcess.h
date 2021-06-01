@@ -24,6 +24,8 @@
 #include <queue>
 /* import unique pointer */
 #include <memory>
+/* import mutex class*/
+#include <mutex>
 
 
  /* error codes for udata process class ------------------------------------ */
@@ -44,7 +46,9 @@ private:
     /* pointer to data base processor class */
     std::shared_ptr<DDataBase> dataBaseProcessor;
     //std::shared_ptr<JJsonParser> jsonParser;
-    std::shared_ptr<HHttpHandler> httpHandler;
+    std::unique_ptr<HHttpHandler> httpHandler;
+    /* mutex object to avoid data race */
+    mutable std::mutex mutex_;
 
 public:
     /* data process handler */
@@ -54,13 +58,13 @@ public:
     ~DDataProcess();
 
     /* get new response from data process class queue */
-    void pushDataProcRespsQueue(std::string sDataProcRequest);
+    void pushDataProcRespsQueue(std::string&& sDataProcRequest);
     /* get new response from data process class queue */
-    std::string pullDataProcRespsQueue(void);
+    const std::string& pullDataProcRespsQueue(void);
     /* put new request in data process class queue */
-    void pushDataProcReqsQueue(std::string sDataProcRequest);
+    void pushDataProcReqsQueue(std::string&& sDataProcRequest);
     /* get new request in data process class queue */
-    std::string pullDataProcReqsQueue(void);
+    const std::string& pullDataProcReqsQueue(void);
 
     bool dataProcReqsQueueEmpty(void);
     bool dataProcRespsQueueEmpty(void);
